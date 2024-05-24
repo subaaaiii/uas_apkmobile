@@ -16,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.STRING,
           allowNull: false
          },
+         image:{
+          type: DataTypes.STRING,
+          allowNull: false
+         },
          category1:{
           type: DataTypes.STRING,
           allowNull: false
@@ -32,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.FLOAT,
           allowNull: false
          },
-         rating:{
+         pages:{
           type: DataTypes.INTEGER,
           allowNull: false
          },

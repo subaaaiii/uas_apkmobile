@@ -19,6 +19,10 @@ module.exports = {
       type: Sequelize.STRING,
       allowNull: false
      },
+     image:{
+      type: Sequelize.STRING,
+      allowNull: false
+     },
      category1:{
       type: Sequelize.STRING,
       allowNull: false
@@ -35,7 +39,7 @@ module.exports = {
       type: Sequelize.FLOAT,
       allowNull: false
      },
-     rating:{
+     pages:{
       type: Sequelize.INTEGER,
       allowNull: false
      },

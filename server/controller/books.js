@@ -1,45 +1,134 @@
-const getAllBooks =(req,res)=>{
-    const data ={
-        id: 1,
-        name: "lumpu",
-        kategori: "romance"
+const { Book } = require("../models");
+const getAllBooks = async (res) => {
+  try {
+    const book = await Book.findAll();
+    res.status(201).json({
+      message: "get all books success",
+      data: book,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const findBookById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const book = await Book.findByPk(id);
+    if (book) {
+      res.status(201).json({
+        message: "get book success",
+        data: book,
+      });
+    } else {
+      res.status(201).json({ message: "book not found" });
     }
-    res.json({
-        message: 'get all books success',
-        data: data
-    })
-}
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
-const createNewBooks =(req,res)=>{
-    // console.log(req.body);
-    res.json({
-        message: 'create new books success',
-        data: req.body 
-    })
-}
+const createNewBooks = async (req, res) => {
+  try {
+    const {
+      name,
+      author,
+      image,
+      category1,
+      category2,
+      category3,
+      rating,
+      pages,
+      cover,
+      year,
+      description,
+    } = req.body;
+    const book = await Book.create({
+      name,
+      author,
+      image: image || "default.png",
+      category1,
+      category2,
+      category3,
+      rating,
+      pages,
+      cover,
+      year,
+      description,
+    });
+    res.status(201).json({
+      message: "create book success",
+      data: book,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
-const updateBooks = (req,res)=>{
-    console.log(req.params)
-    const {id} = req.params
-    res.json({
-        message: "update books succes",
+const updateBooks = async (req, res) => {
+  const {
+    name,
+    author,
+    image,
+    category1,
+    category2,
+    category3,
+    rating,
+    pages,
+    cover,
+    year,
+    description,
+  } = req.body;
+  const { id } = req.params;
+  try {
+    await Book.update(
+      {
+        name,
+        author,
+        ...(image && { image: image }),
+        category1,
+        category2,
+        category3,
+        rating,
+        pages,
+        cover,
+        year,
+        description,
+      },
+      {
+        where: {
+          id: id,
+        },
+      }
+    );
+    res.status(201).json({ message: "update book success" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const deleteBooks = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await Book.destroy({
+      where: {
         id: id,
-        data: req.body
-    })
-}
+      },
+    });
+    res.status(201).json({ message: "delete book success" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
-const deleteBooks = (req,res) =>{
-    const {id} = req.params
-    res.json({
-        message: "delete books success",
-        id: id,
-        // port: process.env.APP_PORT
-    })
-}
-
-module.exports ={
-    getAllBooks,
-    createNewBooks,
-    updateBooks,
-    deleteBooks
-}
+module.exports = {
+  getAllBooks,
+  createNewBooks,
+  updateBooks,
+  deleteBooks,
+  findBookById,
+};
