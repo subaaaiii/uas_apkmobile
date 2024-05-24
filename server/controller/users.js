@@ -1,4 +1,6 @@
 const { User } = require("../models");
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 const getAllUsers = async (req, res) => {
     try {
@@ -35,17 +37,23 @@ const createNewUser = async (req, res) => {
         const {
             username,
             email,
+            password,
             phone,
             dateofbirth,
             profilepicture
         } = req.body;
+        const rawPassword = password;
+        const hashedPassword = await bcrypt.hash(rawPassword, saltRounds);
+
         const user = await User.create({
             username,
             email,
+            password: hashedPassword,
             phone,
             dateofbirth,
             profilepicture
         });
+
         res.status(201).json({
             message: "add user success",
             data: user,
@@ -56,13 +64,49 @@ const createNewUser = async (req, res) => {
     }
 };
 
+const loginUser = async (req, res) => {
+    try {
+        const {
+            username,
+            password
+        } = req.body;
+        const searchedUsername = username;
+        const user = await User.findOne({ where: { username: searchedUsername } });
+        if (user) {
+            const matchedPassword = await bcrypt.compare(password, user.password);
+            if (!matchedPassword) {
+                return res.json({
+                    status: 401,
+                    message: "Password Salah"
+                })
+            }
+            res.json({
+                status: 200,
+                message: "Login Berhasil",
+                data: user
+            })
+        }
+        else {
+            res.json({
+                status: 401,
+                message: "username/email tidak ditemukan"
+            })
+        }
+    } catch (error) {
+        res.json({
+            status: 500,
+            message: error
+        })
+    }
+}
+
 const updateUser = async (req, res) => {
     const {
         username,
         email,
         phone,
         dateofbirth,
-        profilepicure
+        profilepicture
     } = req.body;
     const { id } = req.params;
     try {
@@ -74,7 +118,7 @@ const updateUser = async (req, res) => {
                     email,
                     phone,
                     dateofbirth,
-                    profilepicure
+                    profilepicture
                 },
                 {
                     where: {
@@ -82,10 +126,10 @@ const updateUser = async (req, res) => {
                     },
                 }
             );
-            res.status(201).json({ message: "update book success" });
+            res.status(201).json({ message: "update user success" });
         }
         else {
-            res.status(404).json({ message: "Buku Tidak Ditemukan" });
+            res.status(404).json({ message: "user Tidak Ditemukan" });
         }
 
     } catch (error) {
@@ -121,4 +165,5 @@ module.exports = {
     updateUser,
     deleteUser,
     findUserById,
+    loginUser
 };
