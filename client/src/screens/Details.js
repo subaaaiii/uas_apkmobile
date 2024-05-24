@@ -1,18 +1,16 @@
 import * as React from 'react';
 import {ScrollView, StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-class Details extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { };
-  }
-  
-  render() {
+const Details = ({route}) =>{
+  const navigation = useNavigation();
+  const { id } = route.params;
+  console.log(id)
     return (
       <View style={{flex: 1, backgroundColor:'#427D9D'}}>
         {/* Header */}
           <View style={styles.HeadersContainer}>
-          <TouchableOpacity style={styles.BackButton} onPress={() => this.props.navigation.goBack()}>
+          <TouchableOpacity style={styles.BackButton} onPress={() => navigation.goBack()}>
             <Image 
               source={require('../assets/icons/IconBack.png')}
               style={{width: 30, height: 30}}
@@ -93,7 +91,6 @@ class Details extends React.Component {
       
     );
   }
-}
 
 const styles = StyleSheet.create({
     
