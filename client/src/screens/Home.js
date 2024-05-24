@@ -48,7 +48,7 @@ const Home = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={{borderRadius: 50, overflow: 'hidden'}}
-              onPress={() => this.props.navigation.navigate('Profile')}>
+              onPress={() => navigation.navigate('Profile')}>
               <Image
                 source={require('../assets/images/Cat.jpg')}
                 style={{width: 45, height: 45}}
@@ -144,7 +144,7 @@ const Home = () => {
             <TouchableOpacity
               style={{alignItems: 'center'}}
               onPress={() =>
-                this.props.navigation.navigate('List', {category: 'Fantasy'})
+                navigation.navigate('List', {category: 'Fantasy'})
               }>
               <View style={styles.category}>
                 <Image
@@ -158,7 +158,7 @@ const Home = () => {
             <TouchableOpacity
               style={{alignItems: 'center'}}
               onPress={() =>
-                this.props.navigation.navigate('List', {category: 'Romance'})
+                navigation.navigate('List', {category: 'Romance'})
               }>
               <View style={styles.category}>
                 <Image
@@ -171,7 +171,7 @@ const Home = () => {
             <TouchableOpacity
               style={{alignItems: 'center'}}
               onPress={() =>
-                this.props.navigation.navigate('List', {category: 'Mystery'})
+                navigation.navigate('List', {category: 'Mystery'})
               }>
               <View style={styles.category}>
                 <Image
@@ -185,7 +185,7 @@ const Home = () => {
             <TouchableOpacity
               style={{alignItems: 'center'}}
               onPress={() =>
-                this.props.navigation.navigate('List', {category: 'Horror'})
+                navigation.navigate('List', {category: 'Horror'})
               }>
               <View style={styles.category}>
                 <Image
@@ -209,7 +209,7 @@ const Home = () => {
             <View style={{ gap: 20 }}>
               <TouchableOpacity
                 style={styles.imageContainer}
-                onPress={() => this.props.navigation.navigate('Details')}>
+                onPress={() => navigation.navigate('Details')}>
                 <ImageBackground
                   source={require('../assets/images/background.jpg')}
                   style={styles.imagebackgroundshadow}>
@@ -223,7 +223,7 @@ const Home = () => {
             </View>
             <TouchableOpacity
               style={{alignItems: 'center'}}
-              onPress={() => this.props.navigation.navigate('Details')}>
+              onPress={() => navigation.navigate('Details')}>
               <ImageBackground
                 source={require('../assets/images/background.jpg')}
                 style={styles.imagebackgroundshadow}>
