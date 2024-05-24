@@ -11,25 +11,31 @@ import {
 } from 'react-native';
 import FavoriteButton from '../components/FavoriteButton';
 import {Dimensions} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const {width} = Dimensions.get('window');
 const apiUrl = "http://10.0.2.2:1000";
 
 const Home = () => {
+  const navigation = useNavigation();
   const [books, setBooks] = useState([]);
   
   const fetchBooks = async () => {
     try {
       const response = await axios.get(`${apiUrl}/books`);
-      setBooks(response.data.data);
-      console.log(response.data.data)
+      setBooks(response.data.data[0]);
     } catch (error) { 
-        console.error(error);
+        console.log(error);
     }
   };
   useEffect(() => {
     fetchBooks();
   }, []);
+
+  useEffect(() => {
+    console.log('useefect',books);
+  }, [books]);
+
     return (
       <ScrollView style={{flex: 1}}>
         <View style={styles.header}>
@@ -42,7 +48,7 @@ const Home = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={{borderRadius: 50, overflow: 'hidden'}}
-              onPress={() => this.props.navigation.navigate('Profile')}>
+              onPress={() => navigation.navigate('Profile')}>
               <Image
                 source={require('../assets/images/Cat.jpg')}
                 style={{width: 45, height: 45}}
@@ -78,7 +84,7 @@ const Home = () => {
                 }}>
                 <Text
                   style={{fontSize: 18, fontWeight: '500', color: '#F5F5F5'}}>
-                  Lumpu
+                  {books.name}
                 </Text>
                 <View style={styles.ratings}>
                   <Image
@@ -90,22 +96,22 @@ const Home = () => {
               </View>
               <View style={{marginTop: 10}}>
                 <Text style={{fontSize: 14, color: '#F5F5F5'}}>
-                  By Tere Liye
+                  By {books.author}
                 </Text>
               </View>
               {/* category */}
               <View style={{flexDirection: 'row', marginTop: 16}}>
                 <Text
                   style={[styles.minicategory, {backgroundColor: '#4085B4'}]}>
-                  Romance
+                  {books.category1}
                 </Text>
                 <Text
                   style={[styles.minicategory, {backgroundColor: '#ad8cd3'}]}>
-                  Sci-fi
+                  {books.category2}
                 </Text>
                 <Text
                   style={[styles.minicategory, {backgroundColor: '#886ed4'}]}>
-                  Family
+                  {books.category3}
                 </Text>
               </View>
               <View style={{marginTop: 14}}>
@@ -115,7 +121,8 @@ const Home = () => {
               </View>
               <View style={{marginTop: 16}}>
                 <TouchableOpacity
-                  onPress={() => this.props.navigation.navigate('Details')}>
+                  onPress={() => navigation.navigate('Details', { id: books.id })}
+                  >
                   <Text style={styles.primerbutton}>See Details</Text>
                 </TouchableOpacity>
               </View>
@@ -137,7 +144,7 @@ const Home = () => {
             <TouchableOpacity
               style={{alignItems: 'center'}}
               onPress={() =>
-                this.props.navigation.navigate('List', {category: 'Fantasy'})
+                navigation.navigate('List', {category: 'Fantasy'})
               }>
               <View style={styles.category}>
                 <Image
@@ -151,7 +158,7 @@ const Home = () => {
             <TouchableOpacity
               style={{alignItems: 'center'}}
               onPress={() =>
-                this.props.navigation.navigate('List', {category: 'Romance'})
+                navigation.navigate('List', {category: 'Romance'})
               }>
               <View style={styles.category}>
                 <Image
@@ -164,7 +171,7 @@ const Home = () => {
             <TouchableOpacity
               style={{alignItems: 'center'}}
               onPress={() =>
-                this.props.navigation.navigate('List', {category: 'Mystery'})
+                navigation.navigate('List', {category: 'Mystery'})
               }>
               <View style={styles.category}>
                 <Image
@@ -178,7 +185,7 @@ const Home = () => {
             <TouchableOpacity
               style={{alignItems: 'center'}}
               onPress={() =>
-                this.props.navigation.navigate('List', {category: 'Horror'})
+                navigation.navigate('List', {category: 'Horror'})
               }>
               <View style={styles.category}>
                 <Image
@@ -202,7 +209,7 @@ const Home = () => {
             <View style={{ gap: 20 }}>
               <TouchableOpacity
                 style={styles.imageContainer}
-                onPress={() => this.props.navigation.navigate('Details')}>
+                onPress={() => navigation.navigate('Details')}>
                 <ImageBackground
                   source={require('../assets/images/background.jpg')}
                   style={styles.imagebackgroundshadow}>
@@ -216,7 +223,7 @@ const Home = () => {
             </View>
             <TouchableOpacity
               style={{alignItems: 'center'}}
-              onPress={() => this.props.navigation.navigate('Details')}>
+              onPress={() => navigation.navigate('Details')}>
               <ImageBackground
                 source={require('../assets/images/background.jpg')}
                 style={styles.imagebackgroundshadow}>

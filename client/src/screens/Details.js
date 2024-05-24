@@ -1,18 +1,32 @@
-import * as React from 'react';
+import axios from 'axios';
+import React, {Component, useState, useRef, useEffect } from 'react';
 import {ScrollView, StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+const apiUrl = "http://10.0.2.2:1000";
 
-class Details extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { };
-  }
+const Details = ({route}) =>{
+  const navigation = useNavigation();
+  const { id } = route.params;
+
+  const [book, setBook] = useState([]);
   
-  render() {
+  const fetchBook = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/books/${id}`);
+      setBook(response.data.data);
+    } catch (error) { 
+        console.log(error);
+    }
+  };
+  useEffect(() => {
+    fetchBook();
+  }, []);
+  
     return (
       <View style={{flex: 1, backgroundColor:'#427D9D'}}>
         {/* Header */}
           <View style={styles.HeadersContainer}>
-          <TouchableOpacity style={styles.BackButton} onPress={() => this.props.navigation.goBack()}>
+          <TouchableOpacity style={styles.BackButton} onPress={() => navigation.goBack()}>
             <Image 
               source={require('../assets/icons/IconBack.png')}
               style={{width: 30, height: 30}}
@@ -36,8 +50,8 @@ class Details extends React.Component {
                         />
                     </View>
                     <View style={styles.ContentContainer}>
-                        <Text style={styles.Author}>Tere Liye</Text>
-                        <Text style={styles.Title}>Lumpu</Text>
+                        <Text style={styles.Author}>{book.author}</Text>
+                        <Text style={styles.Title}>{book.name}</Text>
                     </View>
 
                     <View style={{ flexDirection: 'row', margin: 20,  marginBottom:5, justifyContent: 'center', borderTopWidth: 2, borderColor: 'lightgray'}} />
@@ -55,19 +69,19 @@ class Details extends React.Component {
                 <View>
                     <View style={{flexDirection: 'row', margin: 20, justifyContent: 'space-evenly', backgroundColor: '#DDF2FD', borderRadius: 15, marginTop: 10}}>
                         <View style={{padding: 20, alignItems: 'center'}}>
-                            <Text style={styles.BookInfoValue}>4.5</Text>
+                            <Text style={styles.BookInfoValue}>{book.rating}</Text>
                             <Text style={styles.BookInfo}>Rating</Text>
                         </View>
                         <View style={{padding: 20, alignItems: 'center'}}>
-                            <Text style={styles.BookInfoValue}>289</Text>
+                            <Text style={styles.BookInfoValue}>{book.pages}</Text>
                             <Text style={styles.BookInfo}>Pages</Text>
                         </View>
                         <View style={{padding: 20, alignItems: 'center'}}>
-                            <Text style={styles.BookInfoValue}>Soft</Text>
+                            <Text style={styles.BookInfoValue}>{book.cover}</Text>
                             <Text style={styles.BookInfo}>Cover</Text>
                         </View>
                         <View style={{padding: 20, alignItems: 'center'}}>
-                            <Text style={styles.BookInfoValue}>2019</Text>
+                            <Text style={styles.BookInfoValue}>{book.year}</Text>
                             <Text style={styles.BookInfo}>Year</Text>
                         </View>
                     </View>
@@ -75,7 +89,7 @@ class Details extends React.Component {
 
                 <View style={{margin: 20, marginTop: 10}}>
                   <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'black'}}>Description</Text>
-                  <Text style={{ fontSize: 14, color: 'grey', fontWeight: '400', marginTop: 5}}>Kisah belasan tahun di klan Nebula dan akhir cerita di novel Nebula. Sebuah pengkhianatan yang dilakukan oleh Selena justru mengakibatkan kedua sahabatnya, yakni Mata mengorbankan dirinya, sementara Tazk kehilangan kekuatan yang dimilikinya sebab telah dimusnahkan oleh Lumpu. Tamus yang saat itu berada di tempat kejadian dan mempunyai tujuan yang sama, segera melindungi dirinya dengan mengungsi ke Distrik Gunung-Gunung Terlarang.</Text>
+                  <Text style={{ fontSize: 14, color: 'grey', fontWeight: '400', marginTop: 5}}>{book.description}</Text>
                 </View>
               
               {/* 2nd section */}
@@ -93,7 +107,6 @@ class Details extends React.Component {
       
     );
   }
-}
 
 const styles = StyleSheet.create({
     
