@@ -37,14 +37,14 @@ const createNewUser = async (req, res) => {
             email,
             phone,
             dateofbirth,
-            profilepicure
+            profilepicture
         } = req.body;
         const user = await User.create({
             username,
             email,
             phone,
             dateofbirth,
-            profilepicure
+            profilepicture
         });
         res.status(201).json({
             message: "add user success",
