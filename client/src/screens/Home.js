@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, {Component, useState, useRef, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -11,21 +11,23 @@ import {
 } from 'react-native';
 import FavoriteButton from '../components/FavoriteButton';
 import {Dimensions} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 
 const {width} = Dimensions.get('window');
-const apiUrl = "http://10.0.2.2:1000";
+const apiUrl = 'http://10.0.2.2:1000';
 
 const Home = () => {
   const navigation = useNavigation();
-  const [books, setBooks] = useState([]);
-  
+  const [books, setBooks] = useState([]); //temporary top book
+  const [listbooks, setListBooks] = useState([]);
+
   const fetchBooks = async () => {
     try {
       const response = await axios.get(`${apiUrl}/books`);
       setBooks(response.data.data[0]);
-    } catch (error) { 
-        console.log(error);
+      setListBooks(response.data.data);
+    } catch (error) {
+      console.log(error);
     }
   };
   useEffect(() => {
@@ -33,37 +35,38 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    console.log('useefect',books);
-  }, [books]);
+    console.log('books', books);
+    console.log('listbooks', listbooks);
+  }, [books, listbooks]);
 
-    return (
-      <ScrollView style={{flex: 1}}>
-        <View style={styles.header}>
-          <View style={styles.firstSection}>
-            <TouchableOpacity>
-              <Image
-                source={require('../assets/icons/IconMenuDrop.png')}
-                style={{width: 30, height: 30}}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{borderRadius: 50, overflow: 'hidden'}}
-              onPress={() => navigation.navigate('Profile')}>
-              <Image
-                source={require('../assets/images/Cat.jpg')}
-                style={{width: 45, height: 45}}
-              />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.secondSection}>
-            <Text style={{fontSize: 20, fontWeight: '500', color: '#F5F5F5'}}>
-              Top Of The Week
-            </Text>
-            <TouchableOpacity>
-              <Text style={{fontSize: 15, color: '#C3C3C3'}}>View All</Text>
-            </TouchableOpacity>
-          </View>
-          <View>
+  return (
+    <ScrollView style={{flex: 1}}>
+      <View style={styles.header}>
+        <View style={styles.firstSection}>
+          <TouchableOpacity>
+            <Image
+              source={require('../assets/icons/IconMenuDrop.png')}
+              style={{width: 30, height: 30}}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{borderRadius: 50, overflow: 'hidden'}}
+            onPress={() => navigation.navigate('Profile')}>
+            <Image
+              source={require('../assets/images/Cat.jpg')}
+              style={{width: 45, height: 45}}
+            />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.secondSection}>
+          <Text style={{fontSize: 20, fontWeight: '500', color: '#F5F5F5'}}>
+            Top Of The Week
+          </Text>
+          {/* <TouchableOpacity>
+            <Text style={{fontSize: 15, color: '#C3C3C3'}}>View All</Text>
+          </TouchableOpacity> */}
+        </View>
+        <View>
           <View style={styles.thirdSection}>
             <View>
               <ImageBackground
@@ -116,130 +119,112 @@ const Home = () => {
               </View>
               <View style={{marginTop: 14}}>
                 <Text style={{fontSize: 14, color: '#F5F5F5'}}>
-                  Reading By 15 Friends
+                  Favorited by 15 Users
                 </Text>
               </View>
               <View style={{marginTop: 16}}>
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('Details', { id: books.id })}
-                  >
+                  onPress={() =>
+                    navigation.navigate('Details', {id: books.id})
+                  }>
                   <Text style={styles.primerbutton}>See Details</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </View>
-          </View>
         </View>
-        {/* Category */}
-        <View style={styles.categorySection}>
-          <View style={styles.titleSection}>
-            <Text style={{fontSize: 20, fontWeight: 'bold', color: '#212121'}}>
-              Category
-            </Text>
-            <TouchableOpacity>
-              <Text style={{fontSize: 15, color: '#8B8D92'}}>View All</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.categorywrap}>
-            <TouchableOpacity
-              style={{alignItems: 'center'}}
-              onPress={() =>
-                navigation.navigate('List', {category: 'Fantasy'})
-              }>
-              <View style={styles.category}>
-                <Image
-                  source={require('../assets/icons/fantasy.png')}
-                  style={styles.categoryicons}
-                />
-              </View>
+      </View>
+      {/* Category */}
+      <View style={styles.categorySection}>
+        <View style={styles.titleSection}>
+          <Text style={{fontSize: 20, fontWeight: 'bold', color: '#212121'}}>
+            Category
+          </Text>
+          {/* <TouchableOpacity>
+            <Text style={{fontSize: 15, color: '#8B8D92'}}>View All</Text>
+          </TouchableOpacity> */}
+        </View>
+        <View style={styles.categorywrap}>
+          <TouchableOpacity
+            style={{alignItems: 'center'}}
+            onPress={() => navigation.navigate('List', {category: 'Fantasy'})}>
+            <View style={styles.category}>
+              <Image
+                source={require('../assets/icons/fantasy.png')}
+                style={styles.categoryicons}
+              />
+            </View>
 
-              <Text>Fantasy</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{alignItems: 'center'}}
-              onPress={() =>
-                navigation.navigate('List', {category: 'Romance'})
-              }>
-              <View style={styles.category}>
-                <Image
-                  source={require('../assets/icons/romance.png')}
-                  style={styles.categoryicons}
-                />
-              </View>
-              <Text>Romance</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{alignItems: 'center'}}
-              onPress={() =>
-                navigation.navigate('List', {category: 'Mystery'})
-              }>
-              <View style={styles.category}>
-                <Image
-                  source={require('../assets/icons/mistery.png')}
-                  style={styles.categoryicons}
-                />
-              </View>
+            <Text>Fantasy</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{alignItems: 'center'}}
+            onPress={() => navigation.navigate('List', {category: 'Romance'})}>
+            <View style={styles.category}>
+              <Image
+                source={require('../assets/icons/romance.png')}
+                style={styles.categoryicons}
+              />
+            </View>
+            <Text>Romance</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{alignItems: 'center'}}
+            onPress={() => navigation.navigate('List', {category: 'Mystery'})}>
+            <View style={styles.category}>
+              <Image
+                source={require('../assets/icons/mistery.png')}
+                style={styles.categoryicons}
+              />
+            </View>
 
-              <Text>Mystery</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{alignItems: 'center'}}
-              onPress={() =>
-                navigation.navigate('List', {category: 'Horror'})
-              }>
-              <View style={styles.category}>
-                <Image
-                  source={require('../assets/icons/horror.png')}
-                  style={styles.categoryicons}
-                />
-              </View>
-              <Text>Horror</Text>
-            </TouchableOpacity>
-          </View>
-          <View >
+            <Text>Mystery</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{alignItems: 'center'}}
+            onPress={() => navigation.navigate('List', {category: 'Horror'})}>
+            <View style={styles.category}>
+              <Image
+                source={require('../assets/icons/horror.png')}
+                style={styles.categoryicons}
+              />
+            </View>
+            <Text>Horror</Text>
+          </TouchableOpacity>
+        </View>
+        <View>
           <View style={styles.titleSection}>
             <Text style={{fontSize: 20, fontWeight: 'bold', color: '#212121'}}>
               New Arrivals
             </Text>
-            <TouchableOpacity>
+            {/* <TouchableOpacity>
               <Text style={{fontSize: 15, color: '#8B8D92'}}>View All</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
           <View style={styles.arrivalswrap}>
-            <View style={{ gap: 20 }}>
-              <TouchableOpacity
-                style={styles.imageContainer}
-                onPress={() => navigation.navigate('Details')}>
-                <ImageBackground
-                  source={require('../assets/images/background.jpg')}
-                  style={styles.imagebackgroundshadow}>
-                  <Image
-                    source={require('../assets/images/dilan.jpg')}
-                    style={styles.sizebook}
-                  />
-                </ImageBackground>
-              </TouchableOpacity>
-              <FavoriteButton gaya={{top: 10, right: 15}} />
-            </View>
-            <TouchableOpacity
-              style={{alignItems: 'center'}}
-              onPress={() => navigation.navigate('Details')}>
-              <ImageBackground
-                source={require('../assets/images/background.jpg')}
-                style={styles.imagebackgroundshadow}>
-                <Image
-                  source={require('../assets/images/bumi-manusia.jpg')}
-                  style={styles.sizebook}
-                />
-              </ImageBackground>
-            </TouchableOpacity>
-            <FavoriteButton gaya={{top: 10, right: 15}} />
-          </View>
+            {listbooks.map(book => (
+              <View style={{gap: 20}}>
+                <TouchableOpacity
+                  style={styles.imageContainer}
+                  onPress={() => navigation.navigate('Details', {id: book.id})}>
+                  <ImageBackground
+                    source={require('../assets/images/background.jpg')}
+                    style={styles.imagebackgroundshadow}>
+                    <Image
+                      source={require('../assets/images/dilan.jpg')}
+                      style={styles.sizebook}
+                    />
+                  </ImageBackground>
+                </TouchableOpacity>
+                <FavoriteButton gaya={{top: 10, right: 15}} />
+              </View>
+            ))}
           </View>
         </View>
-      </ScrollView>
-    );
-  }
+      </View>
+    </ScrollView>
+  );
+};
 const styles = StyleSheet.create({
   header: {
     padding: 20,
@@ -266,8 +251,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   titleSection: {
-    // width: width,
-    // paddingHorizontal: 10,
     marginTop: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -334,8 +317,9 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
   },
-  sizebook:{
-    width: 120, height: 170
+  sizebook: {
+    width: 120,
+    height: 170,
   },
   arrivalswrap: {
     flexDirection: 'row',
