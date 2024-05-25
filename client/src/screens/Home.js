@@ -191,7 +191,6 @@ const Home = () => {
           {categories.map((category, index) => (
               <TouchableOpacity key={index}
                 style={{alignItems: 'center', marginBottom: 7}}
-                key={category.id}
                 onPress={() =>
                   navigation.navigate('List', {category: category.name})
                 }>
