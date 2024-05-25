@@ -14,10 +14,10 @@ app.use(express.json()); //middleware biar bisa nerima json
 
 app.use('/books', bookRoutes)
 app.use('/users', userRoutes)
+app.use('/categories', categoriesRoutes)
 app.use('/', (req, res) => {
     res.send('API is running')
 })
-app.use('/categories', categoriesRoutes)
 
 app.listen(process.env.APP_PORT, ()=>{
     console.log(`Server Running at Port ${process.env.APP_PORT}`)
