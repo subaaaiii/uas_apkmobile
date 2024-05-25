@@ -150,7 +150,7 @@ const Home = () => {
             onPress={() => navigation.navigate('List', {category: 'Fantasy'})}>
             <View style={styles.category}>
               <Image
-                source={require('../assets/icons/fantasy.png')}
+                source={require('../assets/categories/fantasy.png')}
                 style={styles.categoryicons}
               />
             </View>
@@ -162,7 +162,7 @@ const Home = () => {
             onPress={() => navigation.navigate('List', {category: 'Romance'})}>
             <View style={styles.category}>
               <Image
-                source={require('../assets/icons/romance.png')}
+                source={require('../assets/categories/romance.png')}
                 style={styles.categoryicons}
               />
             </View>
@@ -173,7 +173,7 @@ const Home = () => {
             onPress={() => navigation.navigate('List', {category: 'Mystery'})}>
             <View style={styles.category}>
               <Image
-                source={require('../assets/icons/mistery.png')}
+                source={require('../assets/categories/mistery.png')}
                 style={styles.categoryicons}
               />
             </View>
@@ -185,7 +185,7 @@ const Home = () => {
             onPress={() => navigation.navigate('List', {category: 'Horror'})}>
             <View style={styles.category}>
               <Image
-                source={require('../assets/icons/horror.png')}
+                source={require('../assets/categories/horror.png')}
                 style={styles.categoryicons}
               />
             </View>
