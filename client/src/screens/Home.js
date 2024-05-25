@@ -29,6 +29,7 @@ const apiUrl = 'http://10.0.2.2:1000';
 const Home = () => {
   const navigation = useNavigation();
   const [books, setBooks] = useState([]); //temporary top book
+  const [user, setUser] = useState([]);
   const [listbooks, setListBooks] = useState([]);
   const [categories, setCategories] = useState([]);
   const categoryImages = {
@@ -40,6 +41,16 @@ const Home = () => {
     mystery,
     romance,
     'sci-fi': scifi,
+  };
+
+  const Userid = 1; // Sementara kalo yg login user dgn id = 1
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/users/${Userid}`);
+      setUser(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const fetchBooks = async () => {
@@ -62,6 +73,7 @@ const Home = () => {
   useEffect(() => {
     fetchBooks();
     fetchCategories();
+    fetchUser();
   }, []);
 
   useEffect(() => {
@@ -82,7 +94,7 @@ const Home = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={{borderRadius: 50, overflow: 'hidden'}}
-            onPress={() => navigation.navigate('Profile')}>
+            onPress={() => navigation.navigate('Profile', {id: user.id})}>
             <Image
               source={require('../assets/images/Cat.jpg')}
               style={{width: 45, height: 45}}

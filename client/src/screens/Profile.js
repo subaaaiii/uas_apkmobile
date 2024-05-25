@@ -5,12 +5,13 @@ import axios from 'axios';
 
 const apiUrl = "http://10.0.2.2:1000";
 
-const Profile = () => {
+const Profile = ({route}) => {
   const navigation = useNavigation();
+  const {id} = route.params;
   const [user, setUser] = useState([]);
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${apiUrl}/users/3`);
+      const response = await axios.get(`${apiUrl}/users/${id}`);
       setUser(response.data.data);
     } catch (error) {
       console.log(error);
@@ -100,7 +101,7 @@ const Profile = () => {
             </View>
             <View>
               <Text style={styles.UserDataHeader}>Email</Text>
-              <Text style={styles.UserData}>{user.username}</Text>
+              <Text style={styles.UserData}>{user.email}</Text>
             </View>
           </View>
         </View>
