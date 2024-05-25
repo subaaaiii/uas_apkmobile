@@ -1,7 +1,7 @@
 import React from 'react'
 import {createNativeStackNavigator} from '@react-navigation/native-stack'; 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'; 
-import {Home, Details, Profile, SplashScreen, List} from '../screens';
+import {Home, Details, Profile, SplashScreen, List, AdminBook} from '../screens';
 import { BottomNavigator } from '../components';
 
 const Stack = createNativeStackNavigator ();
@@ -13,7 +13,7 @@ const MainNav = () => {
     <Tab.Navigator screenOptions={{ headerShown: false }} tabBar={props => <BottomNavigator {...props} />}>
       <Tab.Screen name='Home' component={Home} />
       <Tab.Screen name='Search' component={List}/>
-      <Tab.Screen name='Wishlist' component={Profile}/>
+      <Tab.Screen name='Wishlist' component={AdminBook}/>
     </Tab.Navigator>
   );
 }

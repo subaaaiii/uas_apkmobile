@@ -3,5 +3,6 @@ import Details from "./Details";
 import List from "./List";
 import Profile from "./Profile";
 import SplashScreen from "./SplashScreen";
+import AdminBook from "./admin/AdminBook";
 
-export {Home, Details, List, Profile, SplashScreen}
+export {Home, Details, List, Profile, SplashScreen, AdminBook}

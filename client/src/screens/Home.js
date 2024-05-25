@@ -22,9 +22,9 @@ import {
 import FavoriteButton from '../components/FavoriteButton';
 import {Dimensions} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import { API_URL } from '../utils/constant';
 
 const {width} = Dimensions.get('window');
-const apiUrl = 'http://10.0.2.2:1000';
 
 const Home = () => {
   const navigation = useNavigation();
@@ -44,7 +44,7 @@ const Home = () => {
 
   const fetchBooks = async () => {
     try {
-      const response = await axios.get(`${apiUrl}/books`);
+      const response = await axios.get(`${API_URL}/books`);
       setBooks(response.data.data[0]);
       setListBooks(response.data.data);
     } catch (error) {
@@ -53,7 +53,7 @@ const Home = () => {
   };
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(`${apiUrl}/categories`);
+      const response = await axios.get(`${API_URL}/categories`);
       setCategories(response.data.data);
     } catch (error) {
       console.log(error);
@@ -176,8 +176,8 @@ const Home = () => {
           </TouchableOpacity> */}
         </View>
         <View style={styles.categorywrap}>
-          {categories.map(category => (
-              <TouchableOpacity
+          {categories.map((category, index) => (
+              <TouchableOpacity key={index}
                 style={{alignItems: 'center', marginBottom: 7}}
                 onPress={() =>
                   navigation.navigate('List', {category: category.name})
@@ -202,8 +202,8 @@ const Home = () => {
             </TouchableOpacity> */}
           </View>
           <View style={styles.arrivalswrap}>
-            {listbooks.map(book => (
-              <View style={{gap: 20}}>
+            {listbooks.map((book, index) => (
+              <View style={{gap: 20}} key={index}>
                 <TouchableOpacity
                   style={styles.imageContainer}
                   onPress={() => navigation.navigate('Details', {id: book.id})}>
