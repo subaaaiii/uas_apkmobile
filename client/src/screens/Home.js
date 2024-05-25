@@ -43,7 +43,7 @@ const Home = () => {
     'sci-fi': scifi,
   };
 
-  const Userid = 1; // Sementara kalo yg login user dgn id = 1
+  const Userid = 1; // Sementara, kalo yg login user dgn id = 1
   const fetchUser = async () => {
     try {
       const response = await axios.get(`${apiUrl}/users/${Userid}`);
@@ -191,6 +191,7 @@ const Home = () => {
           {categories.map(category => (
               <TouchableOpacity
                 style={{alignItems: 'center', marginBottom: 7}}
+                key={category.id}
                 onPress={() =>
                   navigation.navigate('List', {category: category.name})
                 }>
@@ -215,7 +216,7 @@ const Home = () => {
           </View>
           <View style={styles.arrivalswrap}>
             {listbooks.map(book => (
-              <View style={{gap: 20}}>
+              <View style={{gap: 20}} key={book.id}>
                 <TouchableOpacity
                   style={styles.imageContainer}
                   onPress={() => navigation.navigate('Details', {id: book.id})}>
