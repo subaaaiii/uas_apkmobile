@@ -9,6 +9,16 @@ import {
   ImageBackground,
   ScrollView,
 } from 'react-native';
+import {
+  adventure,
+  comic,
+  drama,
+  fantasy,
+  horror,
+  mystery,
+  romance,
+  scifi,
+} from '../assets';
 import FavoriteButton from '../components/FavoriteButton';
 import {Dimensions} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -20,6 +30,17 @@ const Home = () => {
   const navigation = useNavigation();
   const [books, setBooks] = useState([]); //temporary top book
   const [listbooks, setListBooks] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const categoryImages = {
+    adventure,
+    comic,
+    drama,
+    fantasy,
+    horror,
+    mystery,
+    romance,
+    'sci-fi': scifi,
+  };
 
   const fetchBooks = async () => {
     try {
@@ -30,13 +51,23 @@ const Home = () => {
       console.log(error);
     }
   };
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/categories`);
+      setCategories(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   useEffect(() => {
     fetchBooks();
+    fetchCategories();
   }, []);
 
   useEffect(() => {
     console.log('books', books);
     console.log('listbooks', listbooks);
+    console.log('categories', categories);
   }, [books, listbooks]);
 
   return (
@@ -134,7 +165,7 @@ const Home = () => {
           </View>
         </View>
       </View>
-      {/* Category */}
+      {/* BAGIAN Category */}
       <View style={styles.categorySection}>
         <View style={styles.titleSection}>
           <Text style={{fontSize: 20, fontWeight: 'bold', color: '#212121'}}>
@@ -145,52 +176,21 @@ const Home = () => {
           </TouchableOpacity> */}
         </View>
         <View style={styles.categorywrap}>
-          <TouchableOpacity
-            style={{alignItems: 'center'}}
-            onPress={() => navigation.navigate('List', {category: 'Fantasy'})}>
-            <View style={styles.category}>
-              <Image
-                source={require('../assets/categories/fantasy.png')}
-                style={styles.categoryicons}
-              />
-            </View>
-
-            <Text>Fantasy</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{alignItems: 'center'}}
-            onPress={() => navigation.navigate('List', {category: 'Romance'})}>
-            <View style={styles.category}>
-              <Image
-                source={require('../assets/categories/romance.png')}
-                style={styles.categoryicons}
-              />
-            </View>
-            <Text>Romance</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{alignItems: 'center'}}
-            onPress={() => navigation.navigate('List', {category: 'Mystery'})}>
-            <View style={styles.category}>
-              <Image
-                source={require('../assets/categories/mistery.png')}
-                style={styles.categoryicons}
-              />
-            </View>
-
-            <Text>Mystery</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{alignItems: 'center'}}
-            onPress={() => navigation.navigate('List', {category: 'Horror'})}>
-            <View style={styles.category}>
-              <Image
-                source={require('../assets/categories/horror.png')}
-                style={styles.categoryicons}
-              />
-            </View>
-            <Text>Horror</Text>
-          </TouchableOpacity>
+          {categories.map(category => (
+              <TouchableOpacity
+                style={{alignItems: 'center', marginBottom: 7}}
+                onPress={() =>
+                  navigation.navigate('List', {category: category.name})
+                }>
+                <View style={styles.category}>
+                  <Image
+                    source={categoryImages[category.name]}
+                    style={styles.categoryicons}
+                  />
+                </View>
+                <Text>{category.name.charAt(0).toUpperCase() + category.name.slice(1)}</Text>
+              </TouchableOpacity>
+          ))}
         </View>
         <View>
           <View style={styles.titleSection}>
@@ -303,6 +303,8 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
   categorywrap: {
+    display: 'flex',
+    flexWrap: 'wrap',
     flexDirection: 'row',
     marginTop: 20,
     justifyContent: 'space-between',

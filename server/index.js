@@ -4,16 +4,17 @@ const cors = require('cors');
 
 const bookRoutes = require('./routes/books.js');
 const userRoutes = require('./routes/users.js');
+const categoriesRoutes = require('./routes/categories.js');
 
 const app = express();
 
-app.use(cors());
-
 // app.method(path,handler);
-app.use(express.json()); //middleware 
+app.use(cors());
+app.use(express.json()); //middleware biar bisa nerima json
 
 app.use('/books', bookRoutes)
 app.use('/users', userRoutes)
+app.use('/categories', categoriesRoutes)
 
 app.listen(process.env.APP_PORT, ()=>{
     console.log(`Server Running at Port ${process.env.APP_PORT}`)
