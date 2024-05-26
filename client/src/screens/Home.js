@@ -46,7 +46,7 @@ const Home = () => {
   const Userid = 1; // Sementara, kalo yg login user dgn id = 1
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${apiUrl}/users/${Userid}`);
+      const response = await axios.get(`${API_URL}/users/${Userid}`);
       setUser(response.data.data);
     } catch (error) {
       console.log(error);
