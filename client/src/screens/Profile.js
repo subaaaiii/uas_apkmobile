@@ -12,7 +12,11 @@ const Profile = ({route}) => {
   const fetchUser = async () => {
     try {
       const response = await axios.get(`${apiUrl}/users/${id}`);
-      setUser(response.data.data);
+      const userData = response.data.data;
+      const modifiedDate = userData.dateofbirth.split(' ')[0];
+      
+      userData.dateofbirth = modifiedDate;
+      setUser(userData);
     } catch (error) {
       console.log(error);
     }

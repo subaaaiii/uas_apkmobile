@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-const apiUrl = 'http://10.0.2.2:1000';
+import { API_URL } from '../utils/constant';
 
 const Details = ({route}) => {
   const navigation = useNavigation();
@@ -19,7 +19,7 @@ const Details = ({route}) => {
 
   const fetchBook = async () => {
     try {
-      const response = await axios.get(`${apiUrl}/books/${id}`);
+      const response = await axios.get(`${API_URL}/books/${id}`);
       setBook(response.data.data);
     } catch (error) {
       console.log(error);
