@@ -1,9 +1,10 @@
 import React, { Component, useState, useRef, useEffect } from 'react';
-import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, ImageBackground, FlatList } from 'react-native';
+import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, ImageBackground, Alert  } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import {IconEditWhite} from '../assets';
+import { IconEditWhite } from '../assets';
 import axios from 'axios';
 import { TextInput } from 'react-native-paper';
+
 
 const apiUrl = "http://10.0.2.2:1000";
 
@@ -11,18 +12,28 @@ const Profile = ({ route }) => {
   const navigation = useNavigation();
   const { id } = route.params;
   const [user, setUser] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
   const fetchUser = async () => {
     try {
       const response = await axios.get(`${apiUrl}/users/${id}`);
       const userData = response.data.data;
       const modifiedDate = userData.dateofbirth.split(' ')[0];
-
       userData.dateofbirth = modifiedDate;
       setUser(userData);
     } catch (error) {
       console.log(error);
     }
-  };
+  }
+  const updateUser = async () => {
+    try {
+      const response = await axios.patch(`${apiUrl}/users/${id}`, user);
+      console.log(response.data)
+      setIsEditing(false);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  ;
 
   useEffect(() => {
     fetchUser();
@@ -42,7 +53,8 @@ const Profile = ({ route }) => {
 
         <Text style={styles.Headers}>Profile</Text>
         <View style={{ flexBasis: 100, alignItems: 'center' }}>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setIsEditing(true)}>
             <IconEditWhite width={25} height={25} />
           </TouchableOpacity>
         </View>
@@ -88,6 +100,7 @@ const Profile = ({ route }) => {
 
       {/* 2nd section */}
       <View>
+
         <View style={{ padding: 10, paddingLeft: 20, paddingTop: 20 }}>
           <View style={{ borderBottomWidth: 1, borderColor: 'lightgrey', flexDirection: 'row' }}>
             <View style={{ marginRight: 3 }}>
@@ -96,10 +109,18 @@ const Profile = ({ route }) => {
                 style={styles.UserDataIcon}
               />
             </View>
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.UserDataHeader}>Username</Text>
-              <Text style={styles.UserData}>{user.username}</Text>
-              <TextInput></TextInput>
+              {isEditing ? (
+                <TextInput style={styles.editInput}
+                  underlineColor='white'
+                  activeUnderlineColor="white"
+                  left={IconEditWhite}
+                  defaultValue={user.username} 
+                  onChangeText={(text) => setUser({ ...user, username: text })} />
+              ) : (
+                <Text style={styles.UserData}>{user.username}</Text>
+              )}
             </View>
           </View>
         </View>
@@ -112,9 +133,18 @@ const Profile = ({ route }) => {
                 style={styles.UserDataIcon}
               />
             </View>
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.UserDataHeader}>Email</Text>
-              <Text style={styles.UserData}>{user.email}</Text>
+              {isEditing ? (
+                <TextInput style={styles.editInput}
+                  underlineColor='white'
+                  activeUnderlineColor="white"
+                  left={IconEditWhite}
+                  defaultValue={user.email} 
+                  onChangeText={(text) => setUser({ ...user, email: text })}/>
+              ) : (
+                <Text style={styles.UserData}>{user.email}</Text>
+              )}
             </View>
           </View>
         </View>
@@ -127,9 +157,18 @@ const Profile = ({ route }) => {
                 style={styles.UserDataIcon}
               />
             </View>
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.UserDataHeader}>Phone</Text>
-              <Text style={styles.UserData}>{user.phone}</Text>
+              {isEditing ? (
+                <TextInput style={styles.editInput}
+                  underlineColor='white'
+                  activeUnderlineColor="white"
+                  left={IconEditWhite}
+                  defaultValue={user.phone} 
+                  onChangeText={(text) => setUser({ ...user, phone: text })}/>
+              ) : (
+                <Text style={styles.UserData}>{user.phone}</Text>
+              )}
             </View>
           </View>
         </View>
@@ -142,19 +181,38 @@ const Profile = ({ route }) => {
                 style={styles.UserDataIcon}
               />
             </View>
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.UserDataHeader}>Date of Birth</Text>
-              <Text style={styles.UserData}>{user.dateofbirth}</Text>
+              {isEditing ? (
+                <TextInput style={styles.editInput}
+                  underlineColor='white'
+                  activeUnderlineColor="white"
+                  left={IconEditWhite}
+                  defaultValue={user.dateofbirth} 
+                  onChangeText={(text) => setUser({ ...user, dateofbirth: text })}/>
+              ) : (
+                <Text style={styles.UserData}>{user.dateofbirth}</Text>
+              )}
             </View>
           </View>
         </View>
         {/* 2nd section */}
-        <View>
-          <TouchableOpacity>
-            <Text>
-              Log Out
-            </Text>
-          </TouchableOpacity>
+        <View style={{ alignItems: 'center' }}>
+          {isEditing ? (
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={updateUser}>
+              <Text style={{ color: 'white', fontSize: 15 }}>
+                Save Profile
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.logoutButton}>
+              <Text style={{ color: 'white', fontSize: 15 }}>
+                LOG OUT
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -167,6 +225,7 @@ const styles = StyleSheet.create({
 
   Profile: {
     flex: 1,
+    backgroundColor: 'white',
   },
   Container: {
     alignItems: 'center',
@@ -239,6 +298,28 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     margin: 5
+  },
+  editInput: {
+    height: 40,
+    backgroundColor: '#ececec',
+    underlineColor: 'white',
+    width: 'auto'
+  },
+  logoutButton: {
+    padding: 15,
+    backgroundColor: 'red',
+    margin: 20,
+    borderRadius: 30,
+    paddingLeft: 40,
+    paddingRight: 40
+  },
+  saveButton: {
+    padding: 15,
+    backgroundColor: 'green',
+    margin: 20,
+    borderRadius: 30,
+    paddingLeft: 40,
+    paddingRight: 40
   }
 
 })

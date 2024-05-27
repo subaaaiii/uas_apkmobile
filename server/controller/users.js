@@ -126,7 +126,11 @@ const updateUser = async (req, res) => {
                     },
                 }
             );
-            res.status(201).json({ message: "update user success" });
+            res.status(201).json({ 
+                message: "update user success",
+                data: user
+            
+            });
         }
         else {
             res.status(404).json({ message: "user Tidak Ditemukan" });
