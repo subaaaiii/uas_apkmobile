@@ -1,20 +1,22 @@
 import React, { Component, useState, useRef, useEffect } from 'react';
 import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, ImageBackground, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import {IconEditWhite} from '../assets';
 import axios from 'axios';
+import { TextInput } from 'react-native-paper';
 
 const apiUrl = "http://10.0.2.2:1000";
 
-const Profile = ({route}) => {
+const Profile = ({ route }) => {
   const navigation = useNavigation();
-  const {id} = route.params;
+  const { id } = route.params;
   const [user, setUser] = useState([]);
   const fetchUser = async () => {
     try {
       const response = await axios.get(`${apiUrl}/users/${id}`);
       const userData = response.data.data;
       const modifiedDate = userData.dateofbirth.split(' ')[0];
-      
+
       userData.dateofbirth = modifiedDate;
       setUser(userData);
     } catch (error) {
@@ -39,7 +41,11 @@ const Profile = ({route}) => {
         </TouchableOpacity>
 
         <Text style={styles.Headers}>Profile</Text>
-        <Text style={{ flexBasis: 100 }}></Text>
+        <View style={{ flexBasis: 100, alignItems: 'center' }}>
+          <TouchableOpacity>
+            <IconEditWhite width={25} height={25} />
+          </TouchableOpacity>
+        </View>
       </View>
       {/* Header */}
 
@@ -59,7 +65,9 @@ const Profile = ({route}) => {
               />
             </View>
             <View style={styles.ContentContainer}>
-              <Text style={{ fontSize: 20, color: 'white' }}>{user.username}</Text>
+              <View>
+                <Text style={{ fontSize: 20, color: 'white' }}>{user.username}</Text>
+              </View>
             </View>
 
             <View style={{ flexDirection: 'row', margin: 20 }}>
@@ -91,6 +99,7 @@ const Profile = ({route}) => {
             <View>
               <Text style={styles.UserDataHeader}>Username</Text>
               <Text style={styles.UserData}>{user.username}</Text>
+              <TextInput></TextInput>
             </View>
           </View>
         </View>
@@ -139,9 +148,15 @@ const Profile = ({route}) => {
             </View>
           </View>
         </View>
-
+        {/* 2nd section */}
+        <View>
+          <TouchableOpacity>
+            <Text>
+              Log Out
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      {/* 2nd section */}
 
     </ScrollView>
   );
@@ -172,7 +187,6 @@ const styles = StyleSheet.create({
   },
   HeadersContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
     paddingVertical: 10,
     backgroundColor: '#164863',
     flexDirection: 'row',
@@ -213,7 +227,7 @@ const styles = StyleSheet.create({
     color: 'grey',
     margin: 5,
     fontWeight: 'bold',
-    marginBottom: 30
+    // marginBottom: 30
   },
   UserDataHeader: {
     fontSize: 13,

@@ -48,7 +48,6 @@ const Home = () => {
     try {
       const response = await axios.get(`${API_URL}/users/${Userid}`);
       setUser(response.data.data);
-      console.log(response.data.data)
     } catch (error) {
       console.log(error);
     }
@@ -235,6 +234,8 @@ const Home = () => {
           </View>
         </View>
       </View>
+      <Text>
+      </Text>
     </ScrollView>
   );
 };

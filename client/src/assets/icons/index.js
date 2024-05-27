@@ -6,6 +6,7 @@ import IconWishlist from './wishlist.svg'
 import IconWishlistActive from './wishlistActive.svg'
 import IconDelete from './delete.svg'
 import IconEdit from './edit.svg'
+import IconEditWhite from './editWhite.svg'
 
 
-export {IconHome, IconHomeActive, IconSearch, IconSearchActive, IconWishlistActive, IconWishlist, IconDelete, IconEdit}
+export {IconHome, IconHomeActive, IconSearch, IconSearchActive, IconWishlistActive, IconWishlist, IconDelete, IconEdit, IconEditWhite}
