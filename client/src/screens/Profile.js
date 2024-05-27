@@ -141,6 +141,7 @@ const Profile = ({ route }) => {
                   activeUnderlineColor="white"
                   left={IconEditWhite}
                   defaultValue={user.email} 
+                  keyboardType="email-address"
                   onChangeText={(text) => setUser({ ...user, email: text })}/>
               ) : (
                 <Text style={styles.UserData}>{user.email}</Text>
@@ -165,6 +166,7 @@ const Profile = ({ route }) => {
                   activeUnderlineColor="white"
                   left={IconEditWhite}
                   defaultValue={user.phone} 
+                  keyboardType="phone-pad"
                   onChangeText={(text) => setUser({ ...user, phone: text })}/>
               ) : (
                 <Text style={styles.UserData}>{user.phone}</Text>
@@ -189,6 +191,7 @@ const Profile = ({ route }) => {
                   activeUnderlineColor="white"
                   left={IconEditWhite}
                   defaultValue={user.dateofbirth} 
+                  keyboardType="phone-pad"
                   onChangeText={(text) => setUser({ ...user, dateofbirth: text })}/>
               ) : (
                 <Text style={styles.UserData}>{user.dateofbirth}</Text>
