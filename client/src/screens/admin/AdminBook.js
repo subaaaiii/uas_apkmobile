@@ -17,6 +17,7 @@ import {useNavigation} from '@react-navigation/native';
 const AdminBook = () => {
   const navigation = new useNavigation();
   const [listbooks, setListBooks] = useState([]);
+  const [user, setUser] = useState([]);
   const fetchBooks = async () => {
     try {
       const response = await axios.get(`${API_URL}/books`);
@@ -25,8 +26,19 @@ const AdminBook = () => {
       console.log(error);
     }
   };
+
+  const Userid = 1; // Sementara, kalo yg login user dgn id = 1
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/users/${Userid}`);
+      setUser(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   useEffect(() => {
     fetchBooks();
+    fetchUser();
   }, []);
   return (
     <View>
@@ -55,7 +67,7 @@ const AdminBook = () => {
         </View>
         <TouchableOpacity
           style={{borderRadius: 50, overflow: 'hidden'}}
-          onPress={() => navigation.navigate('Profile', {id: user.id})}>
+          onPress={() => navigation.navigate('Profile', {id: Userid})}>
           <Image
             source={require('../../assets/images/Cat.jpg')}
             style={{width: 45, height: 45}}
@@ -73,7 +85,8 @@ const AdminBook = () => {
           alignItems: 'center',
           justifyContent: 'center',
           borderRadius: 10,
-        }}>
+        }}
+        onPress={() => navigation.navigate('FormBook')}>
         <Text style={{color: '#f9f9f9'}}>+ Add Book</Text>
       </TouchableOpacity>
       <ScrollView horizontal>
