@@ -14,13 +14,18 @@ import {API_URL, WARNA_UTAMA, WARNA_DISABLE} from '../../utils/constant';
 import {useNavigation} from '@react-navigation/native';
 // import { IconEditWhite } from '../../assets';
 
-const FormBook = () => {
+const FormBook = ({route}) => {
+  // const { id } = route.params || null;
+  const { id } = route.params || { id: null };
   const navigation = new useNavigation();
   const [user, setUser] = useState([]);
   const [book, setBook] = useState({
     name: '',
     author: '',
     category1: '',
+    category2: '',
+    category3: '',
+    image: 'lumpu.jpg',
     rating: 0, // Default value changed to 0
     pages: 0, // Default value changed to 0
     cover: '',
@@ -30,7 +35,7 @@ const FormBook = () => {
 
   const fetchBook = async () => {
     try {
-      const response = await axios.get(`${API_URL}/books/2`);
+      const response = await axios.get(`${API_URL}/books/${id}`);
       setBook(response.data.data);
     } catch (error) {
       console.log(error);
@@ -47,9 +52,21 @@ const FormBook = () => {
     }
   };
   useEffect(() => {
-    fetchBook();
+    if(id){
+      fetchBook();
+    }
     fetchUser();
   }, []);
+
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post(`${API_URL}/books`, book);
+      console.log('Data buku berhasil disimpan:', response.data);
+      navigation.navigate('Wishlist',{ refresh: true }); // this is resresh signal
+    } catch (error) {
+      console.error('Gagal menyimpan data buku:', error);
+    }
+  };
   return (
     <ScrollView>
       <View
@@ -72,7 +89,7 @@ const FormBook = () => {
         </TouchableOpacity>
         <View>
           <Text style={{fontSize: 20, color: WARNA_UTAMA, fontWeight: '500'}}>
-            List Book
+          {id ? 'Edit Book' : 'Add Book'}
           </Text>
         </View>
         <TouchableOpacity
@@ -101,9 +118,9 @@ const FormBook = () => {
             <Text style={styles.UserDataHeader}>Nama Buku</Text>
             <TextInput
               style={styles.editInput}
-              underlineColor="white"
+              // underlineColor="white"
               activeUnderlineColor="white"
-              defaultValue={book.name}
+              defaultValue={id? book.name : ''}
               onChangeText={text => setBook({...book, name: text})}
             />
           </View>
@@ -126,9 +143,9 @@ const FormBook = () => {
             <Text style={styles.UserDataHeader}>Author</Text>
             <TextInput
               style={styles.editInput}
-              underlineColor="white"
+              // underlineColor="white"
               activeUnderlineColor="white"
-              defaultValue={book.name}
+              defaultValue={id? book.author : ''}
               onChangeText={text => setBook({...book, author: text})}
             />
           </View>
@@ -151,9 +168,9 @@ const FormBook = () => {
             <Text style={styles.UserDataHeader}>Categories</Text>
             <TextInput
               style={styles.editInput}
-              underlineColor="white"
+              // underlineColor="white"
               activeUnderlineColor="white"
-              defaultValue={book.category1}
+              defaultValue={id? book.category1 : ''}
               onChangeText={text => setBook({...book, category1: text})}
             />
           </View>
@@ -177,9 +194,9 @@ const FormBook = () => {
             <TextInput
               style={styles.editInput}
               keyboardType='numeric'
-              underlineColor="white"
+              // underlineColor="white"
               activeUnderlineColor="white"
-              defaultValue={book.rating.toString()}
+              defaultValue={id? book.rating.toString() : ''}
               onChangeText={text => setBook({...book, rating: text})}
             />
           </View>
@@ -203,9 +220,9 @@ const FormBook = () => {
             <TextInput
               style={styles.editInput}
               keyboardType='numeric'
-              underlineColor="white"
+              // underlineColor="white"
               activeUnderlineColor="white"
-              defaultValue={book.pages.toString()}
+              defaultValue={id? book.pages.toString() : ''}
               onChangeText={text => setBook({...book, pages: text})}
             />
           </View>
@@ -228,9 +245,9 @@ const FormBook = () => {
             <Text style={styles.UserDataHeader}>Cover</Text>
             <TextInput
               style={styles.editInput}
-              underlineColor="white"
+              // underlineColor="white"
               activeUnderlineColor="white"
-              defaultValue={book.cover}
+              defaultValue={id? book.cover : ''}
               onChangeText={text => setBook({...book, cover: text})}
             />
           </View>
@@ -254,9 +271,9 @@ const FormBook = () => {
             <TextInput
               style={styles.editInput}
               keyboardType='numeric'
-              underlineColor="white"
+              // underlineColor="white"
               activeUnderlineColor="white"
-              defaultValue={book.year.toString()}
+              defaultValue={id? book.year.toString() : ''}
               onChangeText={text => setBook({...book, year: text})}
             />
           </View>
@@ -279,14 +296,31 @@ const FormBook = () => {
             <Text style={styles.UserDataHeader}>Description</Text>
             <TextInput
               style={styles.editInput}
-              underlineColor="white"
+              // underlineColor="white"
               activeUnderlineColor="white"
-              defaultValue={book.description}
+              defaultValue={id? book.description :''}
               onChangeText={text => setBook({...book, description: text})}
             />
           </View>
         </View>
       </View>
+      <TouchableOpacity
+        style={{
+          marginTop: 15,
+          marginLeft: 15,
+          paddingHorizontal: 8,
+          paddingVertical: 10,
+          width: 100,
+          backgroundColor: 'green',
+          alignItems: 'center',
+          alignSelf: 'center',
+          justifyContent: 'center',
+          borderRadius: 10,
+          marginBottom: 20,
+        }}
+        onPress={handleSubmit}>
+        <Text style={{color: '#f9f9f9'}}>Save</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -306,8 +340,8 @@ const styles = StyleSheet.create({
   editInput: {
     height: 40,
     backgroundColor: '#ececec',
-    underlineColor: 'white',
-    width: 'auto',
+    // underlineColor: 'white',
+    // width: 'auto',
   },
   UserDataIcon: {
     width: 22,

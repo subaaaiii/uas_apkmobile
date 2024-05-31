@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import {useEffect, useState} from 'react';
 import {DataTable} from 'react-native-paper';
@@ -14,8 +15,10 @@ import {IconDelete, IconEdit} from '../../assets';
 import {API_URL, WARNA_UTAMA, WARNA_DISABLE} from '../../utils/constant';
 import {useNavigation} from '@react-navigation/native';
 
-const AdminBook = () => {
+const AdminBook = ({route}) => {
+  const {refresh} = route.params || {refresh: false};
   const navigation = new useNavigation();
+  console.log(refresh);
   const [listbooks, setListBooks] = useState([]);
   const [user, setUser] = useState([]);
   const fetchBooks = async () => {
@@ -39,7 +42,31 @@ const AdminBook = () => {
   useEffect(() => {
     fetchBooks();
     fetchUser();
-  }, []);
+    // if (refresh) {
+    //   Alert.alert(
+    //     'Success',
+    //     'Book data has been successfully saved!',
+    //     // [{ text: 'OK', onPress: () => console.log('Alert closed') }]
+    //   );
+    // }
+    // if (refresh2) {
+    //   Alert.alert(
+    //     'Success',
+    //     'Book data has been deleted',
+    //     // [{ text: 'OK', onPress: () => console.log('Alert closed') }]
+    //   );
+    // }
+  }, [refresh]);
+
+  const handleDelete = async (id) => {
+    try {
+      const response = await axios.delete(`${API_URL}/books/${id}`);
+      console.log('Data buku berhasil disimpan:', response.data);
+      fetchBooks();
+    } catch (error) {
+      console.error('Gagal menghapus data buku:', error);
+    }
+  };
   return (
     <View>
       <View
@@ -113,10 +140,13 @@ const AdminBook = () => {
                     alignItems: 'center',
                     gap: 7,
                   }}>
-                  <TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.navigate('FormBook', {id: book.id})
+                    }>
                     <IconEdit width={15} height={15} />
                   </TouchableOpacity>
-                  <TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleDelete(book.id)}>
                     <IconDelete width={18} height={18} />
                   </TouchableOpacity>
                 </View>
