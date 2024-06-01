@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -8,12 +8,12 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { API_URL } from '../utils/constant';
 
-const Details = ({route}) => {
+const Details = ({ route }) => {
   const navigation = useNavigation();
-  const {id} = route.params;
+  const { id } = route.params;
 
   const [book, setBook] = useState([]);
 
@@ -30,7 +30,7 @@ const Details = ({route}) => {
   }, []);
 
   return (
-    <View style={{flex: 1, backgroundColor: '#427D9D'}}>
+    <View style={{ flex: 1, backgroundColor: '#427D9D' }}>
       {/* Header */}
       <View style={styles.HeadersContainer}>
         <TouchableOpacity
@@ -38,12 +38,12 @@ const Details = ({route}) => {
           onPress={() => navigation.goBack()}>
           <Image
             source={require('../assets/icons/IconBack.png')}
-            style={{width: 30, height: 30}}
+            style={{ width: 30, height: 30 }}
           />
         </TouchableOpacity>
 
         <Text style={styles.Headers}>Details</Text>
-        <Text style={{flexBasis: 100}}></Text>
+        <Text style={{ flexBasis: 100 }}></Text>
       </View>
       {/* Header */}
 
@@ -51,7 +51,7 @@ const Details = ({route}) => {
         <View style={styles.TopContainer}>
           <View style>
             {/* 1st section */}
-            <View style={{marginTop: -130}}>
+            <View style={{ marginTop: -130 }}>
               <View style={styles.ContentContainer}>
                 <Image
                   source={require('../assets/images/lumpu.jpeg')}
@@ -85,7 +85,7 @@ const Details = ({route}) => {
               }}>
               <View>
                 <Text
-                  style={{fontSize: 18, fontWeight: 'bold', color: 'black'}}>
+                  style={{ fontSize: 18, fontWeight: 'bold', color: 'black' }}>
                   About Book
                 </Text>
               </View>
@@ -101,27 +101,27 @@ const Details = ({route}) => {
                   borderRadius: 15,
                   marginTop: 10,
                 }}>
-                <View style={{padding: 20, alignItems: 'center'}}>
+                <View style={{ padding: 20, alignItems: 'center' }}>
                   <Text style={styles.BookInfoValue}>{book.rating}</Text>
                   <Text style={styles.BookInfo}>Rating</Text>
                 </View>
-                <View style={{padding: 20, alignItems: 'center'}}>
+                <View style={{ padding: 20, alignItems: 'center' }}>
                   <Text style={styles.BookInfoValue}>{book.pages}</Text>
                   <Text style={styles.BookInfo}>Pages</Text>
                 </View>
-                <View style={{padding: 20, alignItems: 'center'}}>
+                <View style={{ padding: 20, alignItems: 'center' }}>
                   <Text style={styles.BookInfoValue}>{book.cover}</Text>
                   <Text style={styles.BookInfo}>Cover</Text>
                 </View>
-                <View style={{padding: 20, alignItems: 'center'}}>
+                <View style={{ padding: 20, alignItems: 'center' }}>
                   <Text style={styles.BookInfoValue}>{book.year}</Text>
                   <Text style={styles.BookInfo}>Year</Text>
                 </View>
               </View>
             </View>
 
-            <View style={{margin: 20, marginTop: 10}}>
-              <Text style={{fontSize: 18, fontWeight: 'bold', color: 'black'}}>
+            <View style={{ margin: 20, marginTop: 10 }}>
+              <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'black' }}>
                 Description
               </Text>
               <Text
