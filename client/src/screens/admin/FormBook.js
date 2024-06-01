@@ -16,7 +16,7 @@ import {useNavigation} from '@react-navigation/native';
 
 const FormBook = ({route}) => {
   // const { id } = route.params || null;
-  const { id } = route.params || { id: null };
+  const {id} = route.params || {id: null};
   const navigation = new useNavigation();
   const [user, setUser] = useState([]);
   const [book, setBook] = useState({
@@ -30,8 +30,11 @@ const FormBook = ({route}) => {
     pages: 0, // Default value changed to 0
     cover: '',
     year: 0, // Default value changed to 0
-    description: ''
+    description: '',
   });
+  const [dropDown, setDropDown] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [field, setField] = useState(false);
 
   const fetchBook = async () => {
     try {
@@ -51,10 +54,21 @@ const FormBook = ({route}) => {
       console.log(error);
     }
   };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/categories`);
+      setCategories(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
-    if(id){
+    if (id) {
       fetchBook();
     }
+    fetchCategories();
     fetchUser();
   }, []);
 
@@ -62,10 +76,44 @@ const FormBook = ({route}) => {
     try {
       const response = await axios.post(`${API_URL}/books`, book);
       console.log('Data buku berhasil disimpan:', response.data);
-      navigation.navigate('Wishlist',{ refresh: true }); // this is resresh signal
+      navigation.navigate('Wishlist', {refresh: true}); // this is resresh signal
     } catch (error) {
       console.error('Gagal menyimpan data buku:', error);
     }
+  };
+
+  toggleDropdown = () => {
+    setDropDown(!dropDown);
+  };
+
+  renderDropdownContent = field => {
+    console.log('field', field);
+    const remainingCategories = categories.filter(category => {
+      return ![book.category1, book.category2, book.category3].includes(category.name);
+    });
+    return (
+      <View style={styles.dropdownContent}>
+        <TouchableOpacity
+          style={{flex: 1, alignSelf: 'flex-end', paddingHorizontal: 10}}
+          onPress={() => toggleDropdown()}>
+          <Text>X</Text>
+        </TouchableOpacity>
+        <Text>Choose Category:</Text>
+        <View style={styles.categoryFilter}>
+          {remainingCategories.map((category, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[styles.minicategory, {backgroundColor: 'blue'}]}
+              onPress={() => {
+                setBook({...book, [field]: category.name});
+                toggleDropdown();
+              }}>
+              <Text style={{color: '#f9f9f9'}}>{category.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+    );
   };
   return (
     <ScrollView>
@@ -89,7 +137,7 @@ const FormBook = ({route}) => {
         </TouchableOpacity>
         <View>
           <Text style={{fontSize: 20, color: WARNA_UTAMA, fontWeight: '500'}}>
-          {id ? 'Edit Book' : 'Add Book'}
+            {id ? 'Edit Book' : 'Add Book'}
           </Text>
         </View>
         <TouchableOpacity
@@ -118,9 +166,8 @@ const FormBook = ({route}) => {
             <Text style={styles.UserDataHeader}>Nama Buku</Text>
             <TextInput
               style={styles.editInput}
-              // underlineColor="white"
               activeUnderlineColor="white"
-              defaultValue={id? book.name : ''}
+              defaultValue={id ? book.name : ''}
               onChangeText={text => setBook({...book, name: text})}
             />
           </View>
@@ -143,9 +190,8 @@ const FormBook = ({route}) => {
             <Text style={styles.UserDataHeader}>Author</Text>
             <TextInput
               style={styles.editInput}
-              // underlineColor="white"
               activeUnderlineColor="white"
-              defaultValue={id? book.author : ''}
+              defaultValue={id ? book.author : ''}
               onChangeText={text => setBook({...book, author: text})}
             />
           </View>
@@ -166,13 +212,47 @@ const FormBook = ({route}) => {
           </View>
           <View style={{flex: 1}}>
             <Text style={styles.UserDataHeader}>Categories</Text>
-            <TextInput
-              style={styles.editInput}
-              // underlineColor="white"
-              activeUnderlineColor="white"
-              defaultValue={id? book.category1 : ''}
-              onChangeText={text => setBook({...book, category1: text})}
-            />
+            <View style={{flex: 1}}>
+              <View style={{flexDirection: 'row', flex: 1}}>
+                <View style={styles.categoriesInput}>
+                  <Text>{book.category1}</Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      toggleDropdown();
+                      setField('category1');
+                    }}
+                    style={styles.selectbutton}>
+                    <Text style={{color: '#ececec'}}>Select</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={{flexDirection: 'row', flex: 1}}>
+                <View style={styles.categoriesInput}>
+                  <Text>{book.category2}</Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      toggleDropdown();
+                      setField('category2');
+                    }}
+                    style={styles.selectbutton}>
+                    <Text style={{color: '#ececec'}}>Select</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={{flexDirection: 'row', flex: 1}}>
+                <View style={styles.categoriesInput}>
+                  <Text>{book.category3}</Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      toggleDropdown();
+                      setField('category3');
+                    }}
+                    style={styles.selectbutton}>
+                    <Text style={{color: '#ececec'}}>Select</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
           </View>
         </View>
       </View>
@@ -193,10 +273,9 @@ const FormBook = ({route}) => {
             <Text style={styles.UserDataHeader}>Rating</Text>
             <TextInput
               style={styles.editInput}
-              keyboardType='numeric'
-              // underlineColor="white"
+              keyboardType="numeric"
               activeUnderlineColor="white"
-              defaultValue={id? book.rating.toString() : ''}
+              defaultValue={id ? book.rating.toString() : ''}
               onChangeText={text => setBook({...book, rating: text})}
             />
           </View>
@@ -219,10 +298,9 @@ const FormBook = ({route}) => {
             <Text style={styles.UserDataHeader}>Pages</Text>
             <TextInput
               style={styles.editInput}
-              keyboardType='numeric'
-              // underlineColor="white"
+              keyboardType="numeric"
               activeUnderlineColor="white"
-              defaultValue={id? book.pages.toString() : ''}
+              defaultValue={id ? book.pages.toString() : ''}
               onChangeText={text => setBook({...book, pages: text})}
             />
           </View>
@@ -245,9 +323,8 @@ const FormBook = ({route}) => {
             <Text style={styles.UserDataHeader}>Cover</Text>
             <TextInput
               style={styles.editInput}
-              // underlineColor="white"
               activeUnderlineColor="white"
-              defaultValue={id? book.cover : ''}
+              defaultValue={id ? book.cover : ''}
               onChangeText={text => setBook({...book, cover: text})}
             />
           </View>
@@ -270,10 +347,9 @@ const FormBook = ({route}) => {
             <Text style={styles.UserDataHeader}>Year</Text>
             <TextInput
               style={styles.editInput}
-              keyboardType='numeric'
-              // underlineColor="white"
+              keyboardType="numeric"
               activeUnderlineColor="white"
-              defaultValue={id? book.year.toString() : ''}
+              defaultValue={id ? book.year.toString() : ''}
               onChangeText={text => setBook({...book, year: text})}
             />
           </View>
@@ -296,9 +372,8 @@ const FormBook = ({route}) => {
             <Text style={styles.UserDataHeader}>Description</Text>
             <TextInput
               style={styles.editInput}
-              // underlineColor="white"
               activeUnderlineColor="white"
-              defaultValue={id? book.description :''}
+              defaultValue={id ? book.description : ''}
               onChangeText={text => setBook({...book, description: text})}
             />
           </View>
@@ -321,6 +396,7 @@ const FormBook = ({route}) => {
         onPress={handleSubmit}>
         <Text style={{color: '#f9f9f9'}}>Save</Text>
       </TouchableOpacity>
+      {dropDown && renderDropdownContent(field)}
     </ScrollView>
   );
 };
@@ -340,12 +416,63 @@ const styles = StyleSheet.create({
   editInput: {
     height: 40,
     backgroundColor: '#ececec',
-    // underlineColor: 'white',
-    // width: 'auto',
+    paddingHorizontal: 10,
+  },
+  categoriesInput: {
+    height: 40,
+    backgroundColor: '#ececec',
+    marginBottom: 10,
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 10,
   },
   UserDataIcon: {
     width: 22,
     height: 22,
     margin: 5,
+  },
+  dropdownContent: {
+    position: 'absolute',
+    top: 280,
+    right: 20,
+    backgroundColor: 'white',
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 15,
+    zIndex: 1,
+    maxHeight: 200,
+    maxWidth: 300,
+    paddingTop: 10,
+    paddingBottom: 30,
+  },
+  categoryFilter: {
+    marginTop: 8,
+    width: 'auto',
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  dropdownText: {
+    color: '#333',
+    fontSize: 16,
+  },
+  minicategory: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 5,
+    overflow: 'hidden',
+    fontSize: 12,
+    marginRight: 5,
+    color: '#F5F5F5',
+    marginBottom: 5,
+  },
+  selectbutton: {
+    backgroundColor: '#444444',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 5,
   },
 });
