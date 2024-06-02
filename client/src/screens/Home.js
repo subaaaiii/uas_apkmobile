@@ -8,7 +8,6 @@ import {
   StyleSheet,
   ImageBackground,
   ScrollView,
-  Alert
 } from 'react-native';
 import {
   adventure,
