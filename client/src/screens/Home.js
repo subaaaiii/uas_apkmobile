@@ -9,6 +9,7 @@ import {
   StyleSheet,
   ImageBackground,
   ScrollView,
+  RefreshControl
 } from 'react-native';
 import {
   adventure,
