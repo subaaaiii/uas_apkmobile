@@ -33,6 +33,7 @@ const findBookById = async (req, res) => {
 
 const createNewBooks = async (req, res) => {
   try {
+    console.log(req.file);
     const {
       name,
       author,
@@ -74,24 +75,24 @@ const createNewBooks = async (req, res) => {
 };
 
 const updateBooks = async (req, res) => {
+  const {
+    name,
+    author,
+    category1,
+    category2,
+    category3,
+    rating,
+    pages,
+    cover,
+    year,
+    description,
+  } = req.body;
+  const foto = req.file;
+  if (foto) {
+    image = foto.filename;
+  }else image = null;
+  const { id } = req.body;
   try {
-    const {
-      name,
-      author,
-      category1,
-      category2,
-      category3,
-      rating,
-      pages,
-      cover,
-      year,
-      description,
-    } = req.body;
-    const foto = req.file;
-    if (foto) {
-      image = foto.filename;
-    } else image = null;
-    const { id } = req.body;
     const imageBeforeUpdate = await Book.findOne({
       attributes: ["image"],
       where: {
@@ -102,7 +103,7 @@ const updateBooks = async (req, res) => {
       {
         name,
         author,
-        ...(image !== null && { image: image }),
+        ...(image!==null && { image: image }),
         category1,
         category2,
         category3,
@@ -118,9 +119,13 @@ const updateBooks = async (req, res) => {
         },
       }
     );
-    if (foto && imageBeforeUpdate.image != "noimage.png") {
+    if (
+      foto &&
+      image != "noimage.png"
+    ) {
       fs.unlinkSync("images/book/" + imageBeforeUpdate.image);
     }
+    console.log(imageBeforeUpdate)
     res.status(201).json({ message: "update book success" });
   } catch (error) {
     console.error(error);
@@ -129,22 +134,13 @@ const updateBooks = async (req, res) => {
 };
 
 const deleteBooks = async (req, res) => {
+  const { id } = req.params;
   try {
-    const { id } = req.params;
-    const imageBeforeDelete = await Book.findOne({
-      attributes: ["image"],
-      where: {
-        id: id,
-      },
-    });
     await Book.destroy({
       where: {
         id: id,
       },
     });
-    if (imageBeforeDelete.image != "noimage.png") {
-      fs.unlinkSync("images/book/" + imageBeforeDelete.image);
-    }
     res.status(201).json({ message: "delete book success" });
   } catch (error) {
     console.error(error);
