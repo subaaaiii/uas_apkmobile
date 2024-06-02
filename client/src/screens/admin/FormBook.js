@@ -12,10 +12,9 @@ import {useEffect, useState} from 'react';
 import React from 'react';
 import {API_URL, WARNA_UTAMA, WARNA_DISABLE} from '../../utils/constant';
 import {useNavigation} from '@react-navigation/native';
-// import { IconEditWhite } from '../../assets';
+import {launchImageLibrary} from 'react-native-image-picker';
 
 const FormBook = ({route}) => {
-  // const { id } = route.params || null;
   const {id} = route.params || {id: null};
   const navigation = new useNavigation();
   const [user, setUser] = useState([]);
@@ -35,6 +34,7 @@ const FormBook = ({route}) => {
   const [dropDown, setDropDown] = useState(false);
   const [categories, setCategories] = useState([]);
   const [field, setField] = useState(false);
+  const [photo, setPhoto] = React.useState(null);
 
   const fetchBook = async () => {
     try {
@@ -72,11 +72,60 @@ const FormBook = ({route}) => {
     fetchUser();
   }, []);
 
+  const insertToFormData = () => {
+    const formData = new FormData();
+
+    formData.append('name', book.name);
+    formData.append('author', book.author);
+    formData.append('category1', book.category1);
+    formData.append('category2', book.category2);
+    formData.append('category3', book.category3);
+    formData.append('rating', book.rating.toString());
+    formData.append('pages', book.pages.toString());
+    formData.append('cover', book.cover);
+    formData.append('year', book.year.toString());
+    formData.append('description', book.description);
+
+    if (photo && photo.uri) {
+      const uriParts = photo.uri.split('.');
+      const fileType = uriParts[uriParts.length - 1];
+
+      formData.append('image', {
+        uri: photo.uri,
+        name: photo.fileName,
+        type: `image/${fileType}`,
+      });
+    }
+    return formData;
+  };
   const handleSubmit = async () => {
     try {
-      const response = await axios.post(`${API_URL}/books`, book);
+      const formData = insertToFormData();
+      const response = await axios.post(`${API_URL}/books`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
       console.log('Data buku berhasil disimpan:', response.data);
-      navigation.navigate('Wishlist', {refresh: true}); // this is resresh signal
+      navigation.navigate('Wishlist', {refresh: true});
+    } catch (error) {
+      console.error('Gagal menyimpan data buku:', error);
+    }
+  };
+
+  const handleUpdate = async () => {
+    try {
+      const formData = insertToFormData();
+      formData.append('id', id);
+      const response = await axios.patch(`${API_URL}/books`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log('Data buku berhasil disimpan:', response.data);
+      navigation.navigate('Wishlist', {refresh: true});
     } catch (error) {
       console.error('Gagal menyimpan data buku:', error);
     }
@@ -89,7 +138,9 @@ const FormBook = ({route}) => {
   renderDropdownContent = field => {
     console.log('field', field);
     const remainingCategories = categories.filter(category => {
-      return ![book.category1, book.category2, book.category3].includes(category.name);
+      return ![book.category1, book.category2, book.category3].includes(
+        category.name,
+      );
     });
     return (
       <View style={styles.dropdownContent}>
@@ -115,18 +166,17 @@ const FormBook = ({route}) => {
       </View>
     );
   };
+  const handleInputImage = () => {
+    launchImageLibrary({noData: true}, response => {
+      console.log(response.assets[0]);
+      if (response) {
+        setPhoto(response.assets[0]);
+      }
+    });
+  };
   return (
     <ScrollView>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingVertical: 15,
-          paddingHorizontal: 20,
-          borderBottomWidth: 0.5,
-          borderBottomColor: WARNA_DISABLE,
-        }}>
+      <View style={styles.topbar}>
         <TouchableOpacity
           style={styles.BackButton}
           onPress={() => navigation.goBack()}>
@@ -149,13 +199,8 @@ const FormBook = ({route}) => {
           />
         </TouchableOpacity>
       </View>
-      <View style={{padding: 10, paddingLeft: 20, paddingTop: 20}}>
-        <View
-          style={{
-            borderBottomWidth: 1,
-            borderColor: 'lightgrey',
-            flexDirection: 'row',
-          }}>
+      <View style={[styles.inputcontainer, {marginTop: 20}]}>
+        <View style={styles.inputwrap}>
           <View style={{marginRight: 3}}>
             <Image
               source={require('../../assets/images/ikonBuku.png')}
@@ -163,23 +208,19 @@ const FormBook = ({route}) => {
             />
           </View>
           <View style={{flex: 1}}>
-            <Text style={styles.UserDataHeader}>Nama Buku</Text>
+            <Text style={styles.UserDataHeader}>Title</Text>
             <TextInput
+              placeholder="Insert book title..."
+              placeholderTextColor={WARNA_DISABLE}
               style={styles.editInput}
-              activeUnderlineColor="white"
               defaultValue={id ? book.name : ''}
               onChangeText={text => setBook({...book, name: text})}
             />
           </View>
         </View>
       </View>
-      <View style={{padding: 10, paddingLeft: 20, paddingTop: 10}}>
-        <View
-          style={{
-            borderBottomWidth: 1,
-            borderColor: 'lightgrey',
-            flexDirection: 'row',
-          }}>
+      <View style={styles.inputcontainer}>
+        <View style={styles.inputwrap}>
           <View style={{marginRight: 3}}>
             <Image
               source={require('../../assets/images/ikonAuthor.png')}
@@ -189,21 +230,17 @@ const FormBook = ({route}) => {
           <View style={{flex: 1}}>
             <Text style={styles.UserDataHeader}>Author</Text>
             <TextInput
+              placeholder="Insert author name..."
+              placeholderTextColor={WARNA_DISABLE}
               style={styles.editInput}
-              activeUnderlineColor="white"
               defaultValue={id ? book.author : ''}
               onChangeText={text => setBook({...book, author: text})}
             />
           </View>
         </View>
       </View>
-      <View style={{padding: 10, paddingLeft: 20, paddingTop: 10}}>
-        <View
-          style={{
-            borderBottomWidth: 1,
-            borderColor: 'lightgrey',
-            flexDirection: 'row',
-          }}>
+      <View style={styles.inputcontainer}>
+        <View style={styles.inputwrap}>
           <View style={{marginRight: 3}}>
             <Image
               source={require('../../assets/images/ikonCategories.png')}
@@ -215,7 +252,13 @@ const FormBook = ({route}) => {
             <View style={{flex: 1}}>
               <View style={{flexDirection: 'row', flex: 1}}>
                 <View style={styles.categoriesInput}>
-                  <Text>{book.category1}</Text>
+                  {id ? (
+                    <Text>{book.category1}</Text>
+                  ) : (
+                    <Text style={{color: WARNA_DISABLE}}>
+                      Select category...
+                    </Text>
+                  )}
                   <TouchableOpacity
                     onPress={() => {
                       toggleDropdown();
@@ -228,7 +271,13 @@ const FormBook = ({route}) => {
               </View>
               <View style={{flexDirection: 'row', flex: 1}}>
                 <View style={styles.categoriesInput}>
-                  <Text>{book.category2}</Text>
+                  {id ? (
+                    <Text>{book.category2}</Text>
+                  ) : (
+                    <Text style={{color: WARNA_DISABLE}}>
+                      Select category...
+                    </Text>
+                  )}
                   <TouchableOpacity
                     onPress={() => {
                       toggleDropdown();
@@ -241,7 +290,13 @@ const FormBook = ({route}) => {
               </View>
               <View style={{flexDirection: 'row', flex: 1}}>
                 <View style={styles.categoriesInput}>
-                  <Text>{book.category3}</Text>
+                  {id ? (
+                    <Text>{book.category1}</Text>
+                  ) : (
+                    <Text style={{color: WARNA_DISABLE}}>
+                      Select category...
+                    </Text>
+                  )}
                   <TouchableOpacity
                     onPress={() => {
                       toggleDropdown();
@@ -256,13 +311,55 @@ const FormBook = ({route}) => {
           </View>
         </View>
       </View>
-      <View style={{padding: 10, paddingLeft: 20, paddingTop: 10}}>
-        <View
-          style={{
-            borderBottomWidth: 1,
-            borderColor: 'lightgrey',
-            flexDirection: 'row',
-          }}>
+      <View style={styles.inputcontainer}>
+        <View style={styles.inputwrap}>
+          <View style={{marginRight: 3}}>
+            <Image
+              source={require('../../assets/images/ikonImage.png')}
+              style={styles.UserDataIcon}
+            />
+          </View>
+          <View style={{flex: 1}}>
+            <Text style={styles.UserDataHeader}>Image</Text>
+            <View style={{flex: 1}}>
+              <View style={{flexDirection: 'row', flex: 1}}>
+                <View style={styles.imageInput}>
+                  <View style={styles.imageinputcontainer}>
+                    <Image
+                      source={
+                        photo && photo.uri
+                          ? {uri: photo.uri}
+                          : book.images_link
+                          ? {uri: book.images_link}
+                          : require('../../assets/images/noimage.png')
+                      }
+                      style={{width: 100, height: 140, borderRadius: 5}}
+                    />
+                  </View>
+                  <Text>
+                    {photo && photo.uri
+                      ? photo.fileName
+                      : id && (book.image = 'noimage.png')
+                      ? 'add image'
+                      : id && book.image
+                      ? 'image available'
+                      : 'no image...'}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      handleInputImage();
+                    }}
+                    style={styles.selectbutton}>
+                    <Text style={{color: '#ececec'}}>Select</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+      <View style={styles.inputcontainer}>
+        <View style={styles.inputwrap}>
           <View style={{marginRight: 3}}>
             <Image
               source={require('../../assets/images/ikonRating.png')}
@@ -272,22 +369,18 @@ const FormBook = ({route}) => {
           <View style={{flex: 1}}>
             <Text style={styles.UserDataHeader}>Rating</Text>
             <TextInput
+              placeholder="Rating 0-5.."
+              placeholderTextColor={WARNA_DISABLE}
               style={styles.editInput}
               keyboardType="numeric"
-              activeUnderlineColor="white"
               defaultValue={id ? book.rating.toString() : ''}
               onChangeText={text => setBook({...book, rating: text})}
             />
           </View>
         </View>
       </View>
-      <View style={{padding: 10, paddingLeft: 20, paddingTop: 10}}>
-        <View
-          style={{
-            borderBottomWidth: 1,
-            borderColor: 'lightgrey',
-            flexDirection: 'row',
-          }}>
+      <View style={styles.inputcontainer}>
+        <View style={styles.inputwrap}>
           <View style={{marginRight: 3}}>
             <Image
               source={require('../../assets/images/ikonPage.png')}
@@ -297,22 +390,18 @@ const FormBook = ({route}) => {
           <View style={{flex: 1}}>
             <Text style={styles.UserDataHeader}>Pages</Text>
             <TextInput
+              placeholder="Insert total pages..."
+              placeholderTextColor={WARNA_DISABLE}
               style={styles.editInput}
               keyboardType="numeric"
-              activeUnderlineColor="white"
               defaultValue={id ? book.pages.toString() : ''}
               onChangeText={text => setBook({...book, pages: text})}
             />
           </View>
         </View>
       </View>
-      <View style={{padding: 10, paddingLeft: 20, paddingTop: 10}}>
-        <View
-          style={{
-            borderBottomWidth: 1,
-            borderColor: 'lightgrey',
-            flexDirection: 'row',
-          }}>
+      <View style={styles.inputcontainer}>
+        <View style={styles.inputwrap}>
           <View style={{marginRight: 3}}>
             <Image
               source={require('../../assets/images/ikonBuku.png')}
@@ -322,21 +411,17 @@ const FormBook = ({route}) => {
           <View style={{flex: 1}}>
             <Text style={styles.UserDataHeader}>Cover</Text>
             <TextInput
+              placeholder="Insert cover type..."
+              placeholderTextColor={WARNA_DISABLE}
               style={styles.editInput}
-              activeUnderlineColor="white"
               defaultValue={id ? book.cover : ''}
               onChangeText={text => setBook({...book, cover: text})}
             />
           </View>
         </View>
       </View>
-      <View style={{padding: 10, paddingLeft: 20, paddingTop: 10}}>
-        <View
-          style={{
-            borderBottomWidth: 1,
-            borderColor: 'lightgrey',
-            flexDirection: 'row',
-          }}>
+      <View style={styles.inputcontainer}>
+        <View style={styles.inputwrap}>
           <View style={{marginRight: 3}}>
             <Image
               source={require('../../assets/images/ikonYear.png')}
@@ -346,22 +431,18 @@ const FormBook = ({route}) => {
           <View style={{flex: 1}}>
             <Text style={styles.UserDataHeader}>Year</Text>
             <TextInput
+              placeholder="Insert publish year..."
+              placeholderTextColor={WARNA_DISABLE}
               style={styles.editInput}
               keyboardType="numeric"
-              activeUnderlineColor="white"
               defaultValue={id ? book.year.toString() : ''}
               onChangeText={text => setBook({...book, year: text})}
             />
           </View>
         </View>
       </View>
-      <View style={{padding: 10, paddingLeft: 20, paddingTop: 10}}>
-        <View
-          style={{
-            borderBottomWidth: 1,
-            borderColor: 'lightgrey',
-            flexDirection: 'row',
-          }}>
+      <View style={styles.inputcontainer}>
+        <View style={styles.inputwrap}>
           <View style={{marginRight: 3}}>
             <Image
               source={require('../../assets/images/ikonDescription.png')}
@@ -371,8 +452,14 @@ const FormBook = ({route}) => {
           <View style={{flex: 1}}>
             <Text style={styles.UserDataHeader}>Description</Text>
             <TextInput
-              style={styles.editInput}
-              activeUnderlineColor="white"
+              placeholder="Insert description..."
+              placeholderTextColor={WARNA_DISABLE}
+              multiline={true}
+              numberOfLines={4}
+              style={[
+                styles.editInput,
+                {textAlignVertical: 'top', height: 100},
+              ]}
               defaultValue={id ? book.description : ''}
               onChangeText={text => setBook({...book, description: text})}
             />
@@ -380,20 +467,8 @@ const FormBook = ({route}) => {
         </View>
       </View>
       <TouchableOpacity
-        style={{
-          marginTop: 15,
-          marginLeft: 15,
-          paddingHorizontal: 8,
-          paddingVertical: 10,
-          width: 100,
-          backgroundColor: 'green',
-          alignItems: 'center',
-          alignSelf: 'center',
-          justifyContent: 'center',
-          borderRadius: 10,
-          marginBottom: 20,
-        }}
-        onPress={handleSubmit}>
+        style={styles.savebutton}
+        onPress={id ? handleUpdate : handleSubmit}>
         <Text style={{color: '#f9f9f9'}}>Save</Text>
       </TouchableOpacity>
       {dropDown && renderDropdownContent(field)}
@@ -417,6 +492,8 @@ const styles = StyleSheet.create({
     height: 40,
     backgroundColor: '#ececec',
     paddingHorizontal: 10,
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 5,
   },
   categoriesInput: {
     height: 40,
@@ -427,6 +504,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  imageInput: {
+    backgroundColor: '#ececec',
+    marginBottom: 10,
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 5,
   },
   UserDataIcon: {
     width: 22,
@@ -474,5 +562,46 @@ const styles = StyleSheet.create({
     paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 5,
+  },
+  savebutton: {
+    marginTop: 15,
+    marginLeft: 15,
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+    width: 100,
+    backgroundColor: 'green',
+    alignItems: 'center',
+    alignSelf: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  topbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderBottomWidth: 0.5,
+    borderBottomColor: WARNA_DISABLE,
+  },
+  inputwrap: {
+    borderBottomWidth: 1,
+    borderColor: 'lightgrey',
+    flexDirection: 'row',
+  },
+  inputcontainer: {padding: 10, paddingLeft: 20, paddingTop: 10},
+  imageinputcontainer: {
+    width: 100,
+    height: 140,
+    borderRadius: 5,
+    shadowColor: '#444444',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
   },
 });

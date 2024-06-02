@@ -1,4 +1,6 @@
 const { Book } = require("../models");
+const fs = require("fs");
+
 const getAllBooks = async (req, res) => {
   try {
     const book = await Book.findAll();
@@ -34,7 +36,6 @@ const createNewBooks = async (req, res) => {
     const {
       name,
       author,
-      image,
       category1,
       category2,
       category3,
@@ -44,10 +45,15 @@ const createNewBooks = async (req, res) => {
       year,
       description,
     } = req.body;
+    const foto = req.file;
+    console.log(foto);
+    if (foto) {
+      image = foto.filename;
+    } else image = "noimage.png";
     const book = await Book.create({
       name,
       author,
-      image: image || "default.png",
+      image,
       category1,
       category2,
       category3,
@@ -68,26 +74,35 @@ const createNewBooks = async (req, res) => {
 };
 
 const updateBooks = async (req, res) => {
-  const {
-    name,
-    author,
-    image,
-    category1,
-    category2,
-    category3,
-    rating,
-    pages,
-    cover,
-    year,
-    description,
-  } = req.body;
-  const { id } = req.params;
   try {
+    const {
+      name,
+      author,
+      category1,
+      category2,
+      category3,
+      rating,
+      pages,
+      cover,
+      year,
+      description,
+    } = req.body;
+    const foto = req.file;
+    if (foto) {
+      image = foto.filename;
+    } else image = null;
+    const { id } = req.body;
+    const imageBeforeUpdate = await Book.findOne({
+      attributes: ["image"],
+      where: {
+        id: id,
+      },
+    });
     await Book.update(
       {
         name,
         author,
-        ...(image && { image: image }),
+        ...(image !== null && { image: image }),
         category1,
         category2,
         category3,
@@ -103,6 +118,9 @@ const updateBooks = async (req, res) => {
         },
       }
     );
+    if (foto && imageBeforeUpdate.image != "noimage.png") {
+      fs.unlinkSync("images/book/" + imageBeforeUpdate.image);
+    }
     res.status(201).json({ message: "update book success" });
   } catch (error) {
     console.error(error);
@@ -111,13 +129,22 @@ const updateBooks = async (req, res) => {
 };
 
 const deleteBooks = async (req, res) => {
-  const { id } = req.params;
   try {
+    const { id } = req.params;
+    const imageBeforeDelete = await Book.findOne({
+      attributes: ["image"],
+      where: {
+        id: id,
+      },
+    });
     await Book.destroy({
       where: {
         id: id,
       },
     });
+    if (imageBeforeDelete.image != "noimage.png") {
+      fs.unlinkSync("images/book/" + imageBeforeDelete.image);
+    }
     res.status(201).json({ message: "delete book success" });
   } catch (error) {
     console.error(error);
