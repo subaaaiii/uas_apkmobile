@@ -37,9 +37,6 @@ module.exports = (sequelize, DataTypes) => {
         updatedAt: {
             type: DataTypes.DATE,
             allowNull: false
-        },
-        refreshToken: {
-            type: DataTypes.TEXT
         }
     },{
         tableName: 'users'

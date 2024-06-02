@@ -1,110 +1,42 @@
-import React, { Component, useState, useRef, useEffect, useCallback } from 'react';
-import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, ImageBackground, Alert } from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import React, { Component, useState, useRef, useEffect } from 'react';
+import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, ImageBackground, Alert  } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { IconEditWhite } from '../assets';
 import axios from 'axios';
 import { TextInput } from 'react-native-paper';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { jwtDecode } from 'jwt-decode';
 
-import { API_URL } from '../utils/constant';
+const apiUrl = "http://10.0.2.2:1000";
 
-const Profile = () => {
-      const navigation = useNavigation();
-      const [user, setUser] = useState([]);
-      const [isEditing, setIsEditing] = useState(false);
-      const [userId, setUserId] = useState()
-      const [token, setToken] = useState();
-      const fetchUser = async () => {
-        try {
-          const response = await axios.get(`${API_URL}/users/${userId}`);
-          const userData = response.data.data;
-          const modifiedDate = userData.dateofbirth.split(' ')[0];
-          userData.dateofbirth = modifiedDate;
-          setUser(userData);
-        } catch (error) {
-          console.log(error);
-        }
-      }
-      const updateUser = async () => {
-        try {
-          const response = await axios.patch(`${API_URL}/users/${userId}`, user);
-          console.log(response.data)
-          setIsEditing(false);
-        } catch (error) {
-          console.log(error);
-        }
-      };
-
-      const handleLogout = async () => {
-        try {
-          const refreshToken = await AsyncStorage.getItem('refreshToken');
-          const response = await fetch(
-            `${API_URL}/logout?refreshToken=${refreshToken}`,
-            {
-              method: 'DELETE',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            },
-          );
-          if (response.ok) {
-            await AsyncStorage.removeItem('refreshToken');
-            navigation.navigate('Login');
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      };
-
-      const getNewToken = async () => {
-        try {
-          const refreshToken = await AsyncStorage.getItem('refreshToken');
-          const response = await fetch(
-            `${API_URL}/token?refreshToken=${refreshToken}`,
-            {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            },
-          );
-          const data = await response.json();
-          if (response.ok) {
-            setToken(data.accessToken);
-            const decoded = jwtDecode(data.accessToken);
-            setUserId(decoded.userId);
-          } else {
-            Alert.alert(data.msg);
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      };
-
-      useFocusEffect(
-        useCallback(() => {
-          setToken(null);
-          setUserId(null);
-    
-          const initialize = async () => {
-            await getNewToken();
-            await fetchUser();
-          };
-    
-          initialize();
-    
-          return () => {
-          };
-        }, [])
-      );
-
-      useEffect(() => {
-    if (userId) {
-      fetchUser();
+const Profile = ({ route }) => {
+  const navigation = useNavigation();
+  const { id } = route.params;
+  const [user, setUser] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/users/${id}`);
+      const userData = response.data.data;
+      const modifiedDate = userData.dateofbirth.split(' ')[0];
+      userData.dateofbirth = modifiedDate;
+      setUser(userData);
+    } catch (error) {
+      console.log(error);
     }
-  }, [userId]);
+  }
+  const updateUser = async () => {
+    try {
+      const response = await axios.patch(`${apiUrl}/users/${id}`, user);
+      console.log(response.data)
+      setIsEditing(false);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  ;
 
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
   return (
     <ScrollView style={styles.Profile}>
@@ -183,7 +115,7 @@ const Profile = () => {
                   underlineColor='white'
                   activeUnderlineColor="white"
                   left={IconEditWhite}
-                  defaultValue={user.username}
+                  defaultValue={user.username} 
                   onChangeText={(text) => setUser({ ...user, username: text })} />
               ) : (
                 <Text style={styles.UserData}>{user.username}</Text>
@@ -207,9 +139,9 @@ const Profile = () => {
                   underlineColor='white'
                   activeUnderlineColor="white"
                   left={IconEditWhite}
-                  defaultValue={user.email}
+                  defaultValue={user.email} 
                   keyboardType="email-address"
-                  onChangeText={(text) => setUser({ ...user, email: text })} />
+                  onChangeText={(text) => setUser({ ...user, email: text })}/>
               ) : (
                 <Text style={styles.UserData}>{user.email}</Text>
               )}
@@ -232,9 +164,9 @@ const Profile = () => {
                   underlineColor='white'
                   activeUnderlineColor="white"
                   left={IconEditWhite}
-                  defaultValue={user.phone}
+                  defaultValue={user.phone} 
                   keyboardType="phone-pad"
-                  onChangeText={(text) => setUser({ ...user, phone: text })} />
+                  onChangeText={(text) => setUser({ ...user, phone: text })}/>
               ) : (
                 <Text style={styles.UserData}>{user.phone}</Text>
               )}
@@ -257,9 +189,9 @@ const Profile = () => {
                   underlineColor='white'
                   activeUnderlineColor="white"
                   left={IconEditWhite}
-                  defaultValue={user.dateofbirth}
+                  defaultValue={user.dateofbirth} 
                   keyboardType="phone-pad"
-                  onChangeText={(text) => setUser({ ...user, dateofbirth: text })} />
+                  onChangeText={(text) => setUser({ ...user, dateofbirth: text })}/>
               ) : (
                 <Text style={styles.UserData}>{user.dateofbirth}</Text>
               )}
@@ -277,9 +209,7 @@ const Profile = () => {
               </Text>
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity 
-            style={styles.logoutButton}
-            onPress={handleLogout}>
+            <TouchableOpacity style={styles.logoutButton}>
               <Text style={{ color: 'white', fontSize: 15 }}>
                 LOG OUT
               </Text>

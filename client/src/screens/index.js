@@ -5,6 +5,5 @@ import Profile from "./Profile";
 import SplashScreen from "./SplashScreen";
 import AdminBook from "./admin/AdminBook";
 import FormBook from "./admin/FormBook";
-import Login from "./Login";
 
-export {Home, Details, List, Profile, SplashScreen, AdminBook, FormBook, Login}
+export {Home, Details, List, Profile, SplashScreen, AdminBook, FormBook}

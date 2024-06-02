@@ -1,6 +1,5 @@
 import axios from 'axios';
 import React, {useState, useEffect} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
   Text,
@@ -9,7 +8,7 @@ import {
   StyleSheet,
   ImageBackground,
   ScrollView,
-  RefreshControl
+  Alert
 } from 'react-native';
 import {
   adventure,
@@ -22,7 +21,6 @@ import {
   scifi,
 } from '../assets';
 import FavoriteButton from '../components/FavoriteButton';
-import {jwtDecode} from 'jwt-decode';
 import {Dimensions} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import { API_URL } from '../utils/constant';
@@ -33,8 +31,7 @@ const Home = () => {
   const [refresh, setRefresh] = useState(false);
   const navigation = useNavigation();
   const [books, setBooks] = useState([]); //temporary top book
-  const [token, setToken] = useState('');
-  const [userId, setUserId] = useState();
+  const [user, setUser] = useState([]);
   const [listbooks, setListBooks] = useState([]);
   const [categories, setCategories] = useState([]);
   const categoryImages = {
@@ -47,30 +44,14 @@ const Home = () => {
     romance,
     'sci-fi': scifi,
   };
-  
-  const getNewToken = async () => {
+
+  const Userid = 1; // Sementara, kalo yg login user dgn id = 1
+  const fetchUser = async () => {
     try {
-      const refreshToken = await AsyncStorage.getItem('refreshToken');
-      // const response = await axios.get(`${API_URL}/token?refreshToken=${refreshToken}`);
-      const response = await fetch(
-        `${API_URL}/token?refreshToken=${refreshToken}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        },
-      );
-      const data = await response.json();
-      if (response.ok) {
-        setToken(data.accessToken);
-        const decoded = jwtDecode(data.accessToken);
-        setUserId(decoded.userId)
-      } else {
-        Alert.alert(response.msg);
-      }
+      const response = await axios.get(`${API_URL}/users/${Userid}`);
+      setUser(response.data.data);
     } catch (error) {
-      console.error(error);
+      console.log(error);
     }
   };
 
@@ -98,7 +79,6 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    const Userid = 1; // Sementara, kalo yg login user dgn id = 1
     console.log('books', books);
     console.log('listbooks', listbooks);
     console.log('categories', categories);
@@ -122,7 +102,7 @@ const Home = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={{borderRadius: 50, overflow: 'hidden'}}
-            onPress={() => navigation.navigate('Profile', {id: userId})}>
+            onPress={() => navigation.navigate('Profile', {id: user.id})}>
             <Image
               source={require('../assets/images/Cat.jpg')}
               style={{width: 45, height: 45}}
