@@ -9,7 +9,7 @@ const {uploadBook} = require('../middleware/multer.js')
 router.get('/',booksController.getAllBooks)
 router.get('/:id',booksController.findBookById)
 router.post('/', uploadBook, booksController.createNewBooks)
-router.patch('/:id', uploadBook, booksController.updateBooks)
+router.patch('/', uploadBook, booksController.updateBooks)
 router.delete('/:id', booksController.deleteBooks)
 
 module.exports = router;

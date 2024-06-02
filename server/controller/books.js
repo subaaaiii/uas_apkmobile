@@ -1,4 +1,6 @@
 const { Book } = require("../models");
+const fs = require("fs");
+
 const getAllBooks = async (req, res) => {
   try {
     const book = await Book.findAll();
@@ -89,8 +91,14 @@ const updateBooks = async (req, res) => {
   if (foto) {
     image = foto.filename;
   }else image = null;
-  const { id } = req.params;
+  const { id } = req.body;
   try {
+    const imageBeforeUpdate = await Book.findOne({
+      attributes: ["image"],
+      where: {
+        id: id,
+      },
+    });
     await Book.update(
       {
         name,
@@ -111,7 +119,13 @@ const updateBooks = async (req, res) => {
         },
       }
     );
-    console.log(req)
+    if (
+      foto &&
+      image != "noimage.png"
+    ) {
+      fs.unlinkSync("images/book/" + imageBeforeUpdate.image);
+    }
+    console.log(imageBeforeUpdate)
     res.status(201).json({ message: "update book success" });
   } catch (error) {
     console.error(error);

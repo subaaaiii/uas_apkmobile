@@ -117,7 +117,8 @@ const FormBook = ({route}) => {
   const handleUpdate = async() =>{
     try {
       const formData = insertToFormData();
-      const response = await axios.patch(`${API_URL}/books/${id}`, formData, {
+      formData.append('id', id);
+      const response = await axios.patch(`${API_URL}/books`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -306,13 +307,13 @@ const FormBook = ({route}) => {
                       source={
                         photo && photo.uri
                           ? {uri: photo.uri}
-                          : require('../../assets/images/noimage.png')
+                          : book.images_link ? {uri: book.images_link} : require('../../assets/images/noimage.png')
                       }
                       style={{width: 100, height: 140, borderRadius: 5}}
                     />
                   </View>
                   <Text>
-                    {photo && photo.uri ? photo.fileName : ' no Photo'}
+                    {photo && photo.uri ? photo.fileName : id&& (book.image='noimage.png')? 'add image' : id&&book.image? 'image available' : 'no image'}
                   </Text>
                   <TouchableOpacity
                     onPress={() => {
