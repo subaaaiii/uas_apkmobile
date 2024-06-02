@@ -1,11 +1,8 @@
 require('dotenv').config()
 const express = require('express');
 const cors = require('cors');
-<<<<<<< HEAD
 const cookieParser = require('cookie-parser')
-=======
 const { join } = require("path");
->>>>>>> 38ccea02fa8d57de2b318f0dcde604d0899bad28
 
 const bookRoutes = require('./routes/books.js');
 const userRoutes = require('./routes/users.js');
