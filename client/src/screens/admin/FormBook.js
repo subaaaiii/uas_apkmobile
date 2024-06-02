@@ -72,32 +72,32 @@ const FormBook = ({route}) => {
     fetchUser();
   }, []);
 
-  const insertToFormData =() =>{
+  const insertToFormData = () => {
     const formData = new FormData();
 
-      formData.append('name', book.name);
-      formData.append('author', book.author);
-      formData.append('category1', book.category1);
-      formData.append('category2', book.category2);
-      formData.append('category3', book.category3);
-      formData.append('rating', book.rating.toString());
-      formData.append('pages', book.pages.toString());
-      formData.append('cover', book.cover);
-      formData.append('year', book.year.toString());
-      formData.append('description', book.description);
+    formData.append('name', book.name);
+    formData.append('author', book.author);
+    formData.append('category1', book.category1);
+    formData.append('category2', book.category2);
+    formData.append('category3', book.category3);
+    formData.append('rating', book.rating.toString());
+    formData.append('pages', book.pages.toString());
+    formData.append('cover', book.cover);
+    formData.append('year', book.year.toString());
+    formData.append('description', book.description);
 
-      if (photo && photo.uri) {
-        const uriParts = photo.uri.split('.');
-        const fileType = uriParts[uriParts.length - 1];
+    if (photo && photo.uri) {
+      const uriParts = photo.uri.split('.');
+      const fileType = uriParts[uriParts.length - 1];
 
-        formData.append('image', {
-          uri: photo.uri,
-          name: photo.fileName,
-          type: `image/${fileType}`,
-        });
-      }
-      return formData;
-  }
+      formData.append('image', {
+        uri: photo.uri,
+        name: photo.fileName,
+        type: `image/${fileType}`,
+      });
+    }
+    return formData;
+  };
   const handleSubmit = async () => {
     try {
       const formData = insertToFormData();
@@ -114,7 +114,7 @@ const FormBook = ({route}) => {
     }
   };
 
-  const handleUpdate = async() =>{
+  const handleUpdate = async () => {
     try {
       const formData = insertToFormData();
       formData.append('id', id);
@@ -129,7 +129,7 @@ const FormBook = ({route}) => {
     } catch (error) {
       console.error('Gagal menyimpan data buku:', error);
     }
-  }
+  };
 
   toggleDropdown = () => {
     setDropDown(!dropDown);
@@ -199,7 +199,7 @@ const FormBook = ({route}) => {
           />
         </TouchableOpacity>
       </View>
-      <View style={[styles.inputcontainer, { marginTop: 20 }]}>
+      <View style={[styles.inputcontainer, {marginTop: 20}]}>
         <View style={styles.inputwrap}>
           <View style={{marginRight: 3}}>
             <Image
@@ -210,6 +210,8 @@ const FormBook = ({route}) => {
           <View style={{flex: 1}}>
             <Text style={styles.UserDataHeader}>Title</Text>
             <TextInput
+              placeholder="Insert book title..."
+              placeholderTextColor={WARNA_DISABLE}
               style={styles.editInput}
               defaultValue={id ? book.name : ''}
               onChangeText={text => setBook({...book, name: text})}
@@ -228,6 +230,8 @@ const FormBook = ({route}) => {
           <View style={{flex: 1}}>
             <Text style={styles.UserDataHeader}>Author</Text>
             <TextInput
+              placeholder="Insert author name..."
+              placeholderTextColor={WARNA_DISABLE}
               style={styles.editInput}
               defaultValue={id ? book.author : ''}
               onChangeText={text => setBook({...book, author: text})}
@@ -248,7 +252,13 @@ const FormBook = ({route}) => {
             <View style={{flex: 1}}>
               <View style={{flexDirection: 'row', flex: 1}}>
                 <View style={styles.categoriesInput}>
-                  <Text>{book.category1}</Text>
+                  {id ? (
+                    <Text>{book.category1}</Text>
+                  ) : (
+                    <Text style={{color: WARNA_DISABLE}}>
+                      Select category...
+                    </Text>
+                  )}
                   <TouchableOpacity
                     onPress={() => {
                       toggleDropdown();
@@ -261,7 +271,13 @@ const FormBook = ({route}) => {
               </View>
               <View style={{flexDirection: 'row', flex: 1}}>
                 <View style={styles.categoriesInput}>
-                  <Text>{book.category2}</Text>
+                  {id ? (
+                    <Text>{book.category2}</Text>
+                  ) : (
+                    <Text style={{color: WARNA_DISABLE}}>
+                      Select category...
+                    </Text>
+                  )}
                   <TouchableOpacity
                     onPress={() => {
                       toggleDropdown();
@@ -274,7 +290,13 @@ const FormBook = ({route}) => {
               </View>
               <View style={{flexDirection: 'row', flex: 1}}>
                 <View style={styles.categoriesInput}>
-                  <Text>{book.category3}</Text>
+                  {id ? (
+                    <Text>{book.category1}</Text>
+                  ) : (
+                    <Text style={{color: WARNA_DISABLE}}>
+                      Select category...
+                    </Text>
+                  )}
                   <TouchableOpacity
                     onPress={() => {
                       toggleDropdown();
@@ -307,13 +329,21 @@ const FormBook = ({route}) => {
                       source={
                         photo && photo.uri
                           ? {uri: photo.uri}
-                          : book.images_link ? {uri: book.images_link} : require('../../assets/images/noimage.png')
+                          : book.images_link
+                          ? {uri: book.images_link}
+                          : require('../../assets/images/noimage.png')
                       }
                       style={{width: 100, height: 140, borderRadius: 5}}
                     />
                   </View>
                   <Text>
-                    {photo && photo.uri ? photo.fileName : id&& (book.image='noimage.png')? 'add image' : id&&book.image? 'image available' : 'no image'}
+                    {photo && photo.uri
+                      ? photo.fileName
+                      : id && (book.image = 'noimage.png')
+                      ? 'add image'
+                      : id && book.image
+                      ? 'image available'
+                      : 'no image...'}
                   </Text>
                   <TouchableOpacity
                     onPress={() => {
@@ -339,6 +369,8 @@ const FormBook = ({route}) => {
           <View style={{flex: 1}}>
             <Text style={styles.UserDataHeader}>Rating</Text>
             <TextInput
+              placeholder="Rating 0-5.."
+              placeholderTextColor={WARNA_DISABLE}
               style={styles.editInput}
               keyboardType="numeric"
               defaultValue={id ? book.rating.toString() : ''}
@@ -358,6 +390,8 @@ const FormBook = ({route}) => {
           <View style={{flex: 1}}>
             <Text style={styles.UserDataHeader}>Pages</Text>
             <TextInput
+              placeholder="Insert total pages..."
+              placeholderTextColor={WARNA_DISABLE}
               style={styles.editInput}
               keyboardType="numeric"
               defaultValue={id ? book.pages.toString() : ''}
@@ -377,6 +411,8 @@ const FormBook = ({route}) => {
           <View style={{flex: 1}}>
             <Text style={styles.UserDataHeader}>Cover</Text>
             <TextInput
+              placeholder="Insert cover type..."
+              placeholderTextColor={WARNA_DISABLE}
               style={styles.editInput}
               defaultValue={id ? book.cover : ''}
               onChangeText={text => setBook({...book, cover: text})}
@@ -395,6 +431,8 @@ const FormBook = ({route}) => {
           <View style={{flex: 1}}>
             <Text style={styles.UserDataHeader}>Year</Text>
             <TextInput
+              placeholder="Insert publish year..."
+              placeholderTextColor={WARNA_DISABLE}
               style={styles.editInput}
               keyboardType="numeric"
               defaultValue={id ? book.year.toString() : ''}
@@ -414,14 +452,23 @@ const FormBook = ({route}) => {
           <View style={{flex: 1}}>
             <Text style={styles.UserDataHeader}>Description</Text>
             <TextInput
-              style={styles.editInput}
+              placeholder="Insert description..."
+              placeholderTextColor={WARNA_DISABLE}
+              multiline={true}
+              numberOfLines={4}
+              style={[
+                styles.editInput,
+                {textAlignVertical: 'top', height: 100},
+              ]}
               defaultValue={id ? book.description : ''}
               onChangeText={text => setBook({...book, description: text})}
             />
           </View>
         </View>
       </View>
-      <TouchableOpacity style={styles.savebutton} onPress={id? handleUpdate :handleSubmit}>
+      <TouchableOpacity
+        style={styles.savebutton}
+        onPress={id ? handleUpdate : handleSubmit}>
         <Text style={{color: '#f9f9f9'}}>Save</Text>
       </TouchableOpacity>
       {dropDown && renderDropdownContent(field)}
