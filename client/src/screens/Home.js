@@ -1,5 +1,6 @@
 import axios from 'axios';
 import React, {useState, useEffect} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
   Text,
@@ -20,6 +21,7 @@ import {
   scifi,
 } from '../assets';
 import FavoriteButton from '../components/FavoriteButton';
+import {jwtDecode} from 'jwt-decode';
 import {Dimensions} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import { API_URL } from '../utils/constant';
@@ -27,9 +29,11 @@ import { API_URL } from '../utils/constant';
 const {width} = Dimensions.get('window');
 
 const Home = () => {
+  const [refresh, setRefresh] = useState(false);
   const navigation = useNavigation();
   const [books, setBooks] = useState([]); //temporary top book
-  const [user, setUser] = useState([]);
+  const [token, setToken] = useState('');
+  const [userId, setUserId] = useState();
   const [listbooks, setListBooks] = useState([]);
   const [categories, setCategories] = useState([]);
   const categoryImages = {
@@ -42,14 +46,30 @@ const Home = () => {
     romance,
     'sci-fi': scifi,
   };
-
-  const Userid = 1; // Sementara, kalo yg login user dgn id = 1
-  const fetchUser = async () => {
+  
+  const getNewToken = async () => {
     try {
-      const response = await axios.get(`${API_URL}/users/${Userid}`);
-      setUser(response.data.data);
+      const refreshToken = await AsyncStorage.getItem('refreshToken');
+      // const response = await axios.get(`${API_URL}/token?refreshToken=${refreshToken}`);
+      const response = await fetch(
+        `${API_URL}/token?refreshToken=${refreshToken}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setToken(data.accessToken);
+        const decoded = jwtDecode(data.accessToken);
+        setUserId(decoded.userId)
+      } else {
+        Alert.alert(response.msg);
+      }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -77,13 +97,20 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+    const Userid = 1; // Sementara, kalo yg login user dgn id = 1
     console.log('books', books);
     console.log('listbooks', listbooks);
     console.log('categories', categories);
   }, [books, listbooks]);
 
+  function refetchData(){
+    fetchBooks();
+    // fetchCategories();
+    fetchUser();
+    setRefresh(false)
+  }
   return (
-    <ScrollView style={{flex: 1}}>
+    <ScrollView style={{flex: 1}} refreshControl={<RefreshControl refreshing={refresh} onRefresh={refetchData}/>}>
       <View style={styles.header}>
         <View style={styles.firstSection}>
           <TouchableOpacity>
@@ -94,7 +121,7 @@ const Home = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={{borderRadius: 50, overflow: 'hidden'}}
-            onPress={() => navigation.navigate('Profile', {id: user.id})}>
+            onPress={() => navigation.navigate('Profile', {id: userId})}>
             <Image
               source={require('../assets/images/Cat.jpg')}
               style={{width: 45, height: 45}}
@@ -105,9 +132,6 @@ const Home = () => {
           <Text style={{fontSize: 20, fontWeight: '500', color: '#F5F5F5'}}>
             Top Of The Week
           </Text>
-          {/* <TouchableOpacity>
-            <Text style={{fontSize: 15, color: '#C3C3C3'}}>View All</Text>
-          </TouchableOpacity> */}
         </View>
         <View>
           <View style={styles.thirdSection}>
@@ -189,19 +213,22 @@ const Home = () => {
         </View>
         <View style={styles.categorywrap}>
           {categories.map((category, index) => (
-              <TouchableOpacity key={index}
-                style={{alignItems: 'center', marginBottom: 7}}
-                onPress={() =>
-                  navigation.navigate('List', {category: category.name})
-                }>
-                <View style={styles.category}>
-                  <Image
-                    source={categoryImages[category.name]}
-                    style={styles.categoryicons}
-                  />
-                </View>
-                <Text>{category.name.charAt(0).toUpperCase() + category.name.slice(1)}</Text>
-              </TouchableOpacity>
+            <TouchableOpacity
+              key={index}
+              style={{alignItems: 'center', marginBottom: 7}}
+              onPress={() =>
+                navigation.navigate('List', {category: category.name})
+              }>
+              <View style={styles.category}>
+                <Image
+                  source={categoryImages[category.name]}
+                  style={styles.categoryicons}
+                />
+              </View>
+              <Text>
+                {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
+              </Text>
+            </TouchableOpacity>
           ))}
         </View>
         <View>
@@ -209,33 +236,34 @@ const Home = () => {
             <Text style={{fontSize: 20, fontWeight: 'bold', color: '#212121'}}>
               New Arrivals
             </Text>
-            {/* <TouchableOpacity>
-              <Text style={{fontSize: 15, color: '#8B8D92'}}>View All</Text>
-            </TouchableOpacity> */}
           </View>
           <View style={styles.arrivalswrap}>
-            {listbooks.map((book, index) => (
-              <View style={{gap: 20}} key={index}>
-                <TouchableOpacity
-                  style={styles.imageContainer}
-                  onPress={() => navigation.navigate('Details', {id: book.id})}>
-                  <ImageBackground
-                    source={require('../assets/images/background.jpg')}
-                    style={styles.imagebackgroundshadow}>
-                    <Image
-                      source={require('../assets/images/dilan.jpg')}
-                      style={styles.sizebook}
-                    />
-                  </ImageBackground>
-                </TouchableOpacity>
-                <FavoriteButton gaya={{top: 10, right: 15}} />
-              </View>
-            ))}
+            {listbooks.slice(-4).reverse().map((book, index) => {
+              console.log(book.images_link);
+              return (
+                <View style={{gap: 20, marginBottom: 10}} key={index}>
+                  <TouchableOpacity
+                    style={styles.imageContainer}
+                    onPress={() =>
+                      navigation.navigate('Details', {id: book.id})
+                    }>
+                    <ImageBackground
+                      source={require('../assets/images/background.jpg')}
+                      style={styles.imagebackgroundshadow}>
+                      <Image
+                        source={{uri: book.images_link}}
+                        style={styles.sizebook}
+                      />
+                    </ImageBackground>
+                  </TouchableOpacity>
+                  <FavoriteButton gaya={{top: 10, right: 15}} />
+                </View>
+              );
+            })}
           </View>
         </View>
       </View>
-      <Text>
-      </Text>
+      <Text></Text>
     </ScrollView>
   );
 };
@@ -342,6 +370,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     justifyContent: 'space-between',
     paddingBottom: 30,
+    flexWrap: 'wrap'
   },
   imagebackgroundshadow: {
     padding: 14,
