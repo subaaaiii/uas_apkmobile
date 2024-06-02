@@ -5,7 +5,6 @@ import { IconEditWhite } from '../assets';
 import axios from 'axios';
 import { TextInput } from 'react-native-paper';
 
-
 const apiUrl = "http://10.0.2.2:1000";
 
 const Profile = ({ route }) => {
