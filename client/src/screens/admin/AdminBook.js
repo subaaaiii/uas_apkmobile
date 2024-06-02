@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  RefreshControl
 } from 'react-native';
 import {useEffect, useState} from 'react';
 import {DataTable} from 'react-native-paper';
@@ -17,6 +18,7 @@ import {useNavigation} from '@react-navigation/native';
 
 const AdminBook = ({route}) => {
   const {refresh} = route.params || {refresh: false};
+  const [load, setLoad] = useState(false);
   const navigation = new useNavigation();
   console.log(refresh);
   const [listbooks, setListBooks] = useState([]);
@@ -42,20 +44,6 @@ const AdminBook = ({route}) => {
   useEffect(() => {
     fetchBooks();
     fetchUser();
-    // if (refresh) {
-    //   Alert.alert(
-    //     'Success',
-    //     'Book data has been successfully saved!',
-    //     // [{ text: 'OK', onPress: () => console.log('Alert closed') }]
-    //   );
-    // }
-    // if (refresh2) {
-    //   Alert.alert(
-    //     'Success',
-    //     'Book data has been deleted',
-    //     // [{ text: 'OK', onPress: () => console.log('Alert closed') }]
-    //   );
-    // }
   }, [refresh]);
 
   const handleDelete = async (id) => {
@@ -67,8 +55,14 @@ const AdminBook = ({route}) => {
       console.error('Gagal menghapus data buku:', error);
     }
   };
+
+  function refetchData(){
+    fetchBooks();
+    fetchUser();
+    setLoad(false)
+  }
   return (
-    <View>
+    <ScrollView refreshControl={<RefreshControl refreshing={load} onRefresh={refetchData}/>}>
       <View
         style={{
           flexDirection: 'row',
@@ -119,7 +113,7 @@ const AdminBook = ({route}) => {
       <ScrollView horizontal>
         <DataTable style={styles.container}>
           <DataTable.Header style={styles.tableHeader}>
-            <DataTable.Title style={{width: 75}}>Aksi</DataTable.Title>
+            <DataTable.Title style={{width: 75}}>Action</DataTable.Title>
             <DataTable.Title style={{width: 25}}>Id</DataTable.Title>
             <DataTable.Title style={{width: 75}}>Name</DataTable.Title>
             <DataTable.Title style={{width: 75}}>Author</DataTable.Title>
@@ -168,7 +162,7 @@ const AdminBook = ({route}) => {
           ))}
         </DataTable>
       </ScrollView>
-    </View>
+    </ScrollView>
   );
 };
 

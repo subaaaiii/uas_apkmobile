@@ -31,10 +31,10 @@ const findBookById = async (req, res) => {
 
 const createNewBooks = async (req, res) => {
   try {
+    console.log(req.file);
     const {
       name,
       author,
-      image,
       category1,
       category2,
       category3,
@@ -44,10 +44,15 @@ const createNewBooks = async (req, res) => {
       year,
       description,
     } = req.body;
+    const foto = req.file;
+    console.log(foto);
+    if (foto) {
+      image = foto.filename;
+    } else image = "noimage.png";
     const book = await Book.create({
       name,
       author,
-      image: image || "default.png",
+      image,
       category1,
       category2,
       category3,
@@ -71,7 +76,6 @@ const updateBooks = async (req, res) => {
   const {
     name,
     author,
-    image,
     category1,
     category2,
     category3,
@@ -81,13 +85,17 @@ const updateBooks = async (req, res) => {
     year,
     description,
   } = req.body;
+  const foto = req.file;
+  if (foto) {
+    image = foto.filename;
+  }else image = null;
   const { id } = req.params;
   try {
     await Book.update(
       {
         name,
         author,
-        ...(image && { image: image }),
+        ...(image!==null && { image: image }),
         category1,
         category2,
         category3,
@@ -103,6 +111,7 @@ const updateBooks = async (req, res) => {
         },
       }
     );
+    console.log(req)
     res.status(201).json({ message: "update book success" });
   } catch (error) {
     console.error(error);
