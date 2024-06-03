@@ -77,7 +77,7 @@ const Login = () => {
             flexDirection: 'row',
           }}>
           <Text>Dont have an Account </Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
             <Text style={{ color: 'blue' }}>Click Here</Text>
           </TouchableOpacity>
         </View>

@@ -1,7 +1,7 @@
 import React from 'react'
 import {createNativeStackNavigator} from '@react-navigation/native-stack'; 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'; 
-import {Home, Details, Profile, SplashScreen, List, AdminBook, FormBook, Login} from '../screens';
+import {Home, Details, Profile, SplashScreen, List, AdminBook, FormBook, Login, Register} from '../screens';
 import { BottomNavigator } from '../components';
 
 const Stack = createNativeStackNavigator ();
@@ -20,8 +20,9 @@ const MainNav = () => {
 
 const Router = () => {
   return (
-    <Stack.Navigator initialRouteName='Login' screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName='Register' screenOptions={{ headerShown: false }}>
         <Stack.Screen name='SplashScreen' component={SplashScreen}/>
+        <Stack.Screen name='Register' component={Register}/>
         <Stack.Screen name='Login' component={Login}/>
         <Stack.Screen name='MainNav' component={MainNav}/>
         <Stack.Screen name='Details' component={Details}/>

@@ -165,6 +165,50 @@ const deleteUser = async (req, res) => {
     }
 };
 
+const registerUser = async (req, res) => {
+    const { username, email, password, confPassword, phone, dateofbirth } = req.body;
+  
+    if (!username.trim() || !email.trim() || !password.trim() || !confPassword.trim()) {
+      return res.status(400).json({ message: "Input fields cannot be empty" });
+    }
+  
+    if (password !== confPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
+  
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({ message: "Password must be at least 8 characters long, include at least one uppercase letter and one number" });
+    }
+  
+    if (password !== confPassword)
+      return res.status(400).json({ message: "Password not match" });
+  
+    const existingUser = await User.findAll({
+      where: {
+        email: email,
+      },
+    });
+    if (existingUser.length > 0)
+      return res.status(400).json({ message: "Email already registered" });
+  
+    const salt = await bcrypt.genSalt();
+    const hashPassword = await bcrypt.hash(password, salt);
+  
+    try {
+      await User.create({
+        username: username,
+        email: email,
+        password: hashPassword,
+        phone: phone,
+        dateofbirth: dateofbirth
+      });
+      res.json({ msg: "Register Success" });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
 const loginUser = async (req, res) => {
     try {
         const user = await User.findOne({
@@ -252,5 +296,6 @@ module.exports = {
     deleteUser,
     findUserById,
     loginUser,
-    logoutUser
+    logoutUser,
+    registerUser
 };

@@ -8,6 +8,7 @@ router.get('/', (req, res) => {
     res.send('API is running')
 })
 router.get('/token', refreshToken.refreshToken)
+router.post('/register', usersController.registerUser)
 router.post('/login', usersController.loginUser)
 router.delete('/logout', usersController.logoutUser)
 
