@@ -1,42 +1,153 @@
-import React, { Component, useState, useRef, useEffect } from 'react';
-import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, ImageBackground, Alert  } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, ImageBackground, Alert } from 'react-native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { IconEditWhite } from '../assets';
 import axios from 'axios';
+import { launchImageLibrary } from 'react-native-image-picker';
 import { TextInput } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { jwtDecode } from 'jwt-decode';
+import "core-js/stable/atob";
 
-const apiUrl = "http://10.0.2.2:1000";
+import { API_URL } from '../utils/constant';
 
-const Profile = ({ route }) => {
+const Profile = () => {
   const navigation = useNavigation();
-  const { id } = route.params;
   const [user, setUser] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
-  const fetchUser = async () => {
+  const [userId, setUserId] = useState();
+  const [photo, setPhoto] = useState(null)
+  const [token, setToken] = useState();
+  const [profilepicture, setProfilePicture] = useState(null)
+
+  const fetchUserInfo = async () => {
     try {
-      const response = await axios.get(`${apiUrl}/users/${id}`);
+      const response = await axios.get(`${API_URL}/users/${userId}`);
       const userData = response.data.data;
       const modifiedDate = userData.dateofbirth.split(' ')[0];
       userData.dateofbirth = modifiedDate;
       setUser(userData);
+      setProfilePicture(user.images_link)
     } catch (error) {
       console.log(error);
     }
   }
+
   const updateUser = async () => {
     try {
-      const response = await axios.patch(`${apiUrl}/users/${id}`, user);
-      console.log(response.data)
+      const formData = insertFromData();
+      console.log(formData)
+      const response = await axios.patch(`${API_URL}/users/${userId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        }
+      });
       setIsEditing(false);
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const insertFromData = () => {
+    const formData = new FormData();
+
+    formData.append('username', user.username);
+    formData.append('email', user.email);
+    formData.append('phone', user.phone);
+    formData.append('dateofbirth', user.dateofbirth);
+
+    if (photo && photo.uri) {
+      const uriParts = photo.uri.split('.');
+      const fileType = uriParts[uriParts.length - 1];
+
+      formData.append('profilepicture', {
+        uri: photo.uri,
+        name: photo.fileName,
+        type: `image/${fileType}`,
+      });
+    }
+    return formData;
+
   }
-  ;
+
+  const handleLogout = async () => {
+    try {
+      const refreshToken = await AsyncStorage.getItem('refreshToken');
+      const response = await fetch(
+        `${API_URL}/logout?refreshToken=${refreshToken}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      if (response.ok) {
+        await AsyncStorage.removeItem('refreshToken');
+        navigation.navigate('Login');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getNewToken = async () => {
+    try {
+      const refreshToken = await AsyncStorage.getItem('refreshToken');
+      const response = await fetch(
+        `${API_URL}/token?refreshToken=${refreshToken}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setToken(data.accessToken);
+        const decoded = jwtDecode(data.accessToken);
+        setUserId(decoded.userId);
+      } else {
+        Alert.alert(data.msg);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleInputImage = async () => {
+    launchImageLibrary({ noData: true }, response => {
+      console.log(response.assets[0]);
+      if (response) {
+        setPhoto(response.assets[0]);
+      }
+    });
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      setToken(null);
+      setUserId(null);
+
+      const initialize = async () => {
+        await getNewToken();
+        await fetchUserInfo();
+      };
+
+      initialize();
+
+      return () => {
+      };
+    }, [])
+  );
 
   useEffect(() => {
-    fetchUser();
-  }, []);
+    if (userId) {
+      fetchUserInfo();
+    }
+  }, [userId]);
+
 
   return (
     <ScrollView style={styles.Profile}>
@@ -71,9 +182,18 @@ const Profile = ({ route }) => {
           <View style={styles.Container}>
             <View style={styles.ContentContainer}>
               <Image
-                source={require('../assets/images/Cat.jpg')}
+                source={{ uri: user.images_link }}
                 style={styles.ProfilePicture}
               />
+              <TouchableOpacity
+                style={{ backgroundColor: 'green' }}
+                onPress={handleInputImage}
+              >
+                <Image
+                  source={require('../assets/images/user.png')}
+                  style={{ width: 30, height: 30 }}
+                />
+              </TouchableOpacity>
             </View>
             <View style={styles.ContentContainer}>
               <View>
@@ -115,7 +235,7 @@ const Profile = ({ route }) => {
                   underlineColor='white'
                   activeUnderlineColor="white"
                   left={IconEditWhite}
-                  defaultValue={user.username} 
+                  defaultValue={user.username}
                   onChangeText={(text) => setUser({ ...user, username: text })} />
               ) : (
                 <Text style={styles.UserData}>{user.username}</Text>
@@ -139,9 +259,9 @@ const Profile = ({ route }) => {
                   underlineColor='white'
                   activeUnderlineColor="white"
                   left={IconEditWhite}
-                  defaultValue={user.email} 
+                  defaultValue={user.email}
                   keyboardType="email-address"
-                  onChangeText={(text) => setUser({ ...user, email: text })}/>
+                  onChangeText={(text) => setUser({ ...user, email: text })} />
               ) : (
                 <Text style={styles.UserData}>{user.email}</Text>
               )}
@@ -164,9 +284,9 @@ const Profile = ({ route }) => {
                   underlineColor='white'
                   activeUnderlineColor="white"
                   left={IconEditWhite}
-                  defaultValue={user.phone} 
+                  defaultValue={user.phone}
                   keyboardType="phone-pad"
-                  onChangeText={(text) => setUser({ ...user, phone: text })}/>
+                  onChangeText={(text) => setUser({ ...user, phone: text })} />
               ) : (
                 <Text style={styles.UserData}>{user.phone}</Text>
               )}
@@ -189,9 +309,9 @@ const Profile = ({ route }) => {
                   underlineColor='white'
                   activeUnderlineColor="white"
                   left={IconEditWhite}
-                  defaultValue={user.dateofbirth} 
+                  defaultValue={user.dateofbirth}
                   keyboardType="phone-pad"
-                  onChangeText={(text) => setUser({ ...user, dateofbirth: text })}/>
+                  onChangeText={(text) => setUser({ ...user, dateofbirth: text })} />
               ) : (
                 <Text style={styles.UserData}>{user.dateofbirth}</Text>
               )}
@@ -209,7 +329,9 @@ const Profile = ({ route }) => {
               </Text>
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity style={styles.logoutButton}>
+            <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={handleLogout}>
               <Text style={{ color: 'white', fontSize: 15 }}>
                 LOG OUT
               </Text>

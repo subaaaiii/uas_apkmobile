@@ -37,11 +37,22 @@ module.exports = (sequelize, DataTypes) => {
         updatedAt: {
             type: DataTypes.DATE,
             allowNull: false
-        }
-    },{
+        },
+        refreshToken: {
+            type: DataTypes.TEXT
+        },
+        images_link: {
+            type: DataTypes.VIRTUAL,
+            get() {
+                return `http://10.0.2.2:1000/images/user/${this.getDataValue(
+                    "profilepicture"
+                )}`;
+            },
+        },
+    }, {
         tableName: 'users'
     }
-);
+    );
 
     return User;
 }

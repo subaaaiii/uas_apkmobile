@@ -23,8 +23,10 @@ import {
 import FavoriteButton from '../components/FavoriteButton';
 import {Dimensions} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {API_URL} from '../utils/constant';
+import { API_URL } from '../utils/constant';
 import {categoryColors} from '../utils/colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { jwtDecode } from 'jwt-decode';
 
 const {width} = Dimensions.get('window');
 
@@ -32,7 +34,8 @@ const Home = () => {
   const [refresh, setRefresh] = useState(false);
   const navigation = useNavigation();
   const [books, setBooks] = useState([]); //temporary top book
-  const [user, setUser] = useState([]);
+  const [token, setToken] = useState('');
+  const [userId, setUserId] = useState();
   const [listbooks, setListBooks] = useState([]);
   const [categories, setCategories] = useState([]);
   const categoryImages = {
@@ -46,13 +49,29 @@ const Home = () => {
     'sci-fi': scifi,
   };
 
-  const Userid = 1; // Sementara, kalo yg login user dgn id = 1
-  const fetchUser = async () => {
+  const getNewToken = async () => {
     try {
-      const response = await axios.get(`${API_URL}/users/${Userid}`);
-      setUser(response.data.data);
+      const refreshToken = await AsyncStorage.getItem('refreshToken');
+      // const response = await axios.get(`${API_URL}/token?refreshToken=${refreshToken}`);
+      const response = await fetch(
+        `${API_URL}/token?refreshToken=${refreshToken}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setToken(data.accessToken);
+        const decoded = jwtDecode(data.accessToken);
+        setUserId(decoded.userId)
+      } else {
+        Alert.alert(response.msg);
+      }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -76,7 +95,7 @@ const Home = () => {
   useEffect(() => {
     fetchBooks();
     fetchCategories();
-    fetchUser();
+    getNewToken();
   }, []);
 
   useEffect(() => {
@@ -107,7 +126,7 @@ const Home = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={{borderRadius: 50, overflow: 'hidden'}}
-            onPress={() => navigation.navigate('Profile', {id: user.id})}>
+            onPress={() => navigation.navigate('Profile', {id: userId})}>
             <Image
               source={require('../assets/images/Cat.jpg')}
               style={{width: 45, height: 45}}

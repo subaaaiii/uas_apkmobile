@@ -102,6 +102,7 @@ const FormBook = ({route}) => {
   const handleSubmit = async () => {
     try {
       const formData = insertToFormData();
+      console.log(formData.image)
       const response = await axios.post(`${API_URL}/books`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -175,6 +176,7 @@ const FormBook = ({route}) => {
       }
     });
   };
+  
   return (
     <ScrollView>
       <View style={styles.topbar}>
