@@ -201,6 +201,16 @@ const Profile = () => {
               </View>
             </View>
 
+            <View>
+              <TouchableOpacity
+              onPress={() => navigation.navigate('AdminBook')}
+              >
+                <Text>
+                  Go to admin
+                </Text>
+              </TouchableOpacity>
+            </View>
+
             <View style={{ flexDirection: 'row', margin: 20 }}>
               <View style={{ flexDirection: 'row', borderRightWidth: 0.5, padding: 10, borderColor: 'white' }}>
                 <Text style={styles.FollowValue}>4</Text>
