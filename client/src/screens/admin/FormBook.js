@@ -13,6 +13,7 @@ import React from 'react';
 import {API_URL, WARNA_UTAMA, WARNA_DISABLE} from '../../utils/constant';
 import {useNavigation} from '@react-navigation/native';
 import {launchImageLibrary} from 'react-native-image-picker';
+import { categoryColors } from '../../utils/colors';
 
 const FormBook = ({route}) => {
   const {id} = route.params || {id: null};
@@ -154,7 +155,7 @@ const FormBook = ({route}) => {
           {remainingCategories.map((category, index) => (
             <TouchableOpacity
               key={index}
-              style={[styles.minicategory, {backgroundColor: 'blue'}]}
+              style={[styles.minicategory, {backgroundColor: categoryColors[category.name]}]}
               onPress={() => {
                 setBook({...book, [field]: category.name});
                 toggleDropdown();

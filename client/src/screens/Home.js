@@ -8,7 +8,7 @@ import {
   StyleSheet,
   ImageBackground,
   ScrollView,
-  RefreshControl
+  RefreshControl,
 } from 'react-native';
 import {
   adventure,
@@ -23,7 +23,8 @@ import {
 import FavoriteButton from '../components/FavoriteButton';
 import {Dimensions} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import { API_URL } from '../utils/constant';
+import {API_URL} from '../utils/constant';
+import {categoryColors} from '../utils/colors';
 
 const {width} = Dimensions.get('window');
 
@@ -84,14 +85,18 @@ const Home = () => {
     console.log('categories', categories);
   }, [books, listbooks]);
 
-  function refetchData(){
+  function refetchData() {
     fetchBooks();
     // fetchCategories();
     fetchUser();
-    setRefresh(false)
+    setRefresh(false);
   }
   return (
-    <ScrollView style={{flex: 1}} refreshControl={<RefreshControl refreshing={refresh} onRefresh={refetchData}/>}>
+    <ScrollView
+      style={{flex: 1}}
+      refreshControl={
+        <RefreshControl refreshing={refresh} onRefresh={refetchData} />
+      }>
       <View style={styles.header}>
         <View style={styles.firstSection}>
           <TouchableOpacity>
@@ -121,7 +126,7 @@ const Home = () => {
                 source={require('../assets/images/background.jpg')}
                 style={styles.imagebackground}>
                 <Image
-                  source={require('../assets/images/lumpu.jpg')}
+                  source={{uri: books.images_link}}
                   style={{width: 90, height: 140}}
                 />
               </ImageBackground>
@@ -153,15 +158,24 @@ const Home = () => {
               {/* category */}
               <View style={{flexDirection: 'row', marginTop: 16}}>
                 <Text
-                  style={[styles.minicategory, {backgroundColor: '#4085B4'}]}>
+                  style={[
+                    styles.minicategory,
+                    {backgroundColor: categoryColors[books.category1]},
+                  ]}>
                   {books.category1}
                 </Text>
                 <Text
-                  style={[styles.minicategory, {backgroundColor: '#ad8cd3'}]}>
+                  style={[
+                    styles.minicategory,
+                    {backgroundColor: categoryColors[books.category2]},
+                  ]}>
                   {books.category2}
                 </Text>
                 <Text
-                  style={[styles.minicategory, {backgroundColor: '#886ed4'}]}>
+                  style={[
+                    styles.minicategory,
+                    {backgroundColor: categoryColors[books.category3]},
+                  ]}>
                   {books.category3}
                 </Text>
               </View>
@@ -219,28 +233,31 @@ const Home = () => {
             </Text>
           </View>
           <View style={styles.arrivalswrap}>
-            {listbooks.slice(-4).reverse().map((book, index) => {
-              console.log(book.images_link);
-              return (
-                <View style={{gap: 20, marginBottom: 10}} key={index}>
-                  <TouchableOpacity
-                    style={styles.imageContainer}
-                    onPress={() =>
-                      navigation.navigate('Details', {id: book.id})
-                    }>
-                    <ImageBackground
-                      source={require('../assets/images/background.jpg')}
-                      style={styles.imagebackgroundshadow}>
-                      <Image
-                        source={{uri: book.images_link}}
-                        style={styles.sizebook}
-                      />
-                    </ImageBackground>
-                  </TouchableOpacity>
-                  <FavoriteButton gaya={{top: 10, right: 15}} />
-                </View>
-              );
-            })}
+            {listbooks
+              .slice(-4)
+              .reverse()
+              .map((book, index) => {
+                console.log(book.images_link);
+                return (
+                  <View style={{gap: 20, marginBottom: 10}} key={index}>
+                    <TouchableOpacity
+                      style={styles.imageContainer}
+                      onPress={() =>
+                        navigation.navigate('Details', {id: book.id})
+                      }>
+                      <ImageBackground
+                        source={require('../assets/images/background.jpg')}
+                        style={styles.imagebackgroundshadow}>
+                        <Image
+                          source={{uri: book.images_link}}
+                          style={styles.sizebook}
+                        />
+                      </ImageBackground>
+                    </TouchableOpacity>
+                    <FavoriteButton gaya={{top: 10, right: 15}} />
+                  </View>
+                );
+              })}
           </View>
         </View>
       </View>
@@ -351,7 +368,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     justifyContent: 'space-between',
     paddingBottom: 30,
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
   },
   imagebackgroundshadow: {
     padding: 14,

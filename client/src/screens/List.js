@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -7,182 +7,183 @@ import {
   StyleSheet,
   Image,
   TextInput,
+  RefreshControl,
 } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import axios from 'axios';
+import {API_URL} from '../utils/constant';
 import BookCard from '../components/BookCard';
+import {categoryColors} from '../utils/colors';
 
-class List extends Component {
-  constructor(props) {
-    super(props);
+const List = ({route}) => {
+  const {category} = route?.params || {category: 'Search'};
+  // const [refresh, setRefresh] = useState(false);
+  const navigation = useNavigation();
+  // const [books, setBooks] = useState([]);
+  const [user, setUser] = useState([]);
+  const [listbooks, setListBooks] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [dropDown, setDropDown] = useState(false);
+  const [search, setSearch] = useState('');
+  const [searchResult, setSearchResult] = useState('');
 
-    this.state = {
-      search: '',
-      isDropdownOpen: false
-    };
-  }
-  toggleDropdown = () => {
-    this.setState(prevState => ({
-      isDropdownOpen: !prevState.isDropdownOpen,
-    }));
+  const Userid = 1; // Sementara, kalo yg login user dgn id = 1
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/users/${Userid}`);
+      setUser(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const 
+  const fetchBooks = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/books`);
+      setListBooks(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/categories`);
+      setCategories(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    fetchBooks();
+    fetchCategories();
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    // console.log('books', books);
+    console.log('listbooks', listbooks);
+    console.log('categories list', categories);
+  }, [listbooks]);
+
+  toggleDropdown = () => {
+    setDropDown(!dropDown);
+  };
 
   renderDropdownContent = () => {
-    const categories=[
-      {name: 'Romance', color: '#4085B4'},
-      {name: 'Sci-fi', color: '#ad8cd3'},
-      {name: 'Family', color: '#886ed4'},
-    ]
     return (
       <View style={styles.dropdownContent}>
         <Text>Filter by kategory:</Text>
         <View style={styles.categoryFilter}>
-        {categories.map((category, index) => (
-            <Text
+          {categories.map((category, index) => (
+            <TouchableOpacity
               key={index}
-              style={[styles.minicategory, {backgroundColor: category.color}]}>
-              {category.name}
-            </Text>
-          ))} 
+              style={[
+                styles.minicategory,
+                {backgroundColor: categoryColors[category.name]},
+              ]}
+              onPress={() =>
+                navigation.navigate('List', {category: category.name})
+              }>
+              <Text style={{color: '#F5F5F5'}}>{category.name}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
     );
   };
-  render() {
-    const { category } = this.props.route?.params || { category: 'Search' };
-    const { isDropdownOpen } = this.state;
-    return (
-      <ScrollView style={{flex: 1}}>
-        <View style={styles.header}>
-          <View style={styles.firstSection}>
-            <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+  return (
+    <ScrollView style={{flex: 1}}>
+      <View style={styles.header}>
+        <View style={styles.firstSection}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={require('../assets/icons/IconBack.png')}
+              style={{width: 30, height: 30}}
+            />
+          </TouchableOpacity>
+          <View>
+            <Text style={{fontSize: 20, color: '#f5f5f5', fontWeight: '500'}}>
+              {category}
+            </Text>
+          </View>
+          <TouchableOpacity>
+            <Image
+              source={require('../assets/icons/IconNotifikasi.png')}
+              style={{width: 25, height: 25}}
+            />
+          </TouchableOpacity>
+        </View>
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: '#f5f5f5',
+            borderRadius: 10,
+            marginTop: 25,
+            color: 'black',
+          }}>
+          <View
+            style={[
+              styles.firstSection,
+              {marginTop: 0, padding: 10, alignItems: 'center'},
+            ]}>
+            <View style={{flexDirection: 'row'}}>
               <Image
-                source={require('../assets/icons/IconBack.png')}
-                style={{width: 30, height: 30}}
-              />
-            </TouchableOpacity>
-            <View>
-              <Text style={{fontSize: 20, color: '#f5f5f5', fontWeight: '500'}}>
-                {category}
-              </Text>
-            </View>
-            <TouchableOpacity>
-              <Image
-                source={require('../assets/icons/IconNotifikasi.png')}
+                source={require('../assets/icons/IconSearch.png')}
                 style={{width: 25, height: 25}}
               />
-            </TouchableOpacity>
-          </View>
-          <View
-            style={{
-              borderWidth: 1,
-              borderColor: '#f5f5f5',
-              borderRadius: 10,
-              marginTop: 25,
-              color: 'black',
-            }}>
-            <View
-              style={[
-                styles.firstSection,
-                {marginTop: 0, padding: 10, alignItems: 'center'},
-              ]}>
-              <View style={{flexDirection: 'row'}}>
+              <TextInput
+                style={styles.searchinput}
+                value={search}
+                onChangeText={value => setSearch(value)}
+                onSubmitEditing={() => {
+                  setSearchResult(search);
+                }}></TextInput>
+            </View>
+            <TouchableOpacity onPress={toggleDropdown}>
+              <View
+                style={{
+                  backgroundColor: '#0E5381',
+                  padding: 5,
+                  borderRadius: 10,
+                  overflow: 'hidden',
+                }}>
                 <Image
-                  source={require('../assets/icons/IconSearch.png')}
+                  source={require('../assets/icons/IconFilter.png')}
                   style={{width: 25, height: 25}}
                 />
-                <TextInput
-                  style={{
-                    padding: 0,
-                    margin: 0,
-                    marginLeft: 10,
-                    width: '78%',
-                    color: '#f5f5f5',
-                  }}
-                  value={this.state.search}
-                  onChangeText={value => this.setState({search: value})}
-                  onSubmitEditing={() => {
-                    this.setState({searchResult: this.state.search});
-                  }}></TextInput>
               </View>
-              <TouchableOpacity onPress={this.toggleDropdown}>
-                <View
-                  style={{
-                    backgroundColor: '#0E5381',
-                    padding: 5,
-                    borderRadius: 10,
-                    overflow: 'hidden',
-                  }}>
-                  <Image
-                    source={require('../assets/icons/IconFilter.png')}
-                    style={{width: 25, height: 25}}
-                  />
-                </View>
-              </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           </View>
-          <View style={{flexDirection: 'row', marginTop: 10}}>
-            {this.state.searchResult && (
-              <View style={{flexDirection: 'row'}}>
-                <Text style={{color: '#f5f5f5'}}>Search Result For </Text>
-                <Text style={{color: '#80B4D7', fontWeight: 'bold'}}>
-                  "{this.state.searchResult}"
-                </Text>
-              </View>
-            )}
-          </View>
-          <View style={{width: 'auto'}}>
-            <BookCard
-              title="Lumpu"
-              author="Tere Liye"
-              image={require('../assets/images/lumpu.jpg')}
-              categories={[
-                {name: 'Romance', color: '#4085B4'},
-                {name: 'Sci-fi', color: '#ad8cd3'},
-                {name: 'Family', color: '#886ed4'},
-              ]}
-              onPress={() => this.props.navigation.navigate('Details')}
-            />
-          </View>
-          <BookCard
-            title="Bumi"
-            author="Tere Liye"
-            image={require('../assets/images/bumi.jpg')}
-            categories={[
-              {name: 'Romance', color: '#4085B4'},
-              {name: 'Sci-fi', color: '#ad8cd3'},
-              {name: 'Family', color: '#886ed4'},
-            ]}
-            onPress={() => this.props.navigation.navigate('Details')}
-          />
-          <BookCard
-            title="Nebula"
-            author="Tere Liye"
-            image={require('../assets/images/nebula.jpg')}
-            categories={[
-              {name: 'Romance', color: '#4085B4'},
-              {name: 'Sci-fi', color: '#ad8cd3'},
-              {name: 'Family', color: '#886ed4'},
-            ]}
-            onPress={() => this.props.navigation.navigate('Details')}
-          />
-          <BookCard
-            title="Bulan"
-            author="Tere Liye"
-            image={require('../assets/images/bulan.jpg')}
-            categories={[
-              {name: 'Romance', color: '#4085B4'},
-              {name: 'Sci-fi', color: '#ad8cd3'},
-              {name: 'Family', color: '#886ed4'},
-            ]}
-            onPress={() => this.props.navigation.navigate('Details')}
-          />
-          {isDropdownOpen && this.renderDropdownContent()}
         </View>
-      </ScrollView>
-    );
-  }
-}
+        <View style={{flexDirection: 'row', marginTop: 10}}>
+          {searchResult && (
+            <View style={{flexDirection: 'row'}}>
+              <Text style={{color: '#f5f5f5'}}>Search Result For </Text>
+              <Text style={{color: '#80B4D7', fontWeight: 'bold'}}>
+                "{searchResult}"
+              </Text>
+            </View>
+          )}
+        </View>
+        {listbooks.map((book, index) => (
+          <BookCard
+            key={index}
+            title={book.name}
+            author={book.author}
+            image={book.images_link}
+            categories={[
+              {name: book.category1},
+              {name: book.category2},
+              {name: book.category3},
+            ]}
+            onPress={() => navigation.navigate('Details')}
+          />
+        ))}
+        {dropDown && renderDropdownContent()}
+      </View>
+    </ScrollView>
+  );
+};
 
 const styles = StyleSheet.create({
   header: {
@@ -222,6 +223,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginRight: 5,
     color: '#F5F5F5',
+    marginBottom: 5,
   },
   primerbutton: {
     paddingHorizontal: 8,
@@ -235,31 +237,39 @@ const styles = StyleSheet.create({
   },
   dropdownContent: {
     position: 'absolute',
-    top: 130, 
-    right: 20, 
+    top: 130,
+    right: 20,
     backgroundColor: 'white',
     borderRadius: 5,
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 10,
-    zIndex: 1, 
+    zIndex: 1,
     maxHeight: 200,
-    maxWidth:300
+    maxWidth: 300,
   },
-  categoryFilter:{
+  categoryFilter: {
     marginTop: 7,
-    width:'auto',
-    display:'flex',
+    width: 'auto',
+    display: 'flex',
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   dropdownItem: {
     paddingVertical: 8,
-    marginRight: 50
+    marginRight: 50,
+    marginBottom: 3,
   },
   dropdownText: {
     color: '#333',
     fontSize: 16,
+  },
+  searchinput: {
+    padding: 0,
+    margin: 0,
+    marginLeft: 10,
+    width: '78%',
+    color: '#f5f5f5',
   },
 });
 export default List;

@@ -1,8 +1,16 @@
 import React, {useState} from 'react';
-import { View, Text, ImageBackground, Image, TouchableOpacity,StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  ImageBackground,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 import FavoriteButton from './FavoriteButton';
+import {categoryColors} from '../utils/colors';
 
-const BookCard = ({ title, author, categories, onPress, image }) => {
+const BookCard = ({title, author, categories, onPress, image}) => {
   return (
     <View style={styles.thirdSection}>
       <View>
@@ -10,8 +18,8 @@ const BookCard = ({ title, author, categories, onPress, image }) => {
           source={require('../assets/images/background.jpg')}
           style={styles.imagebackground}>
           <Image
-            source={image}
-            style={{width:70, height: 110}}
+            source={{uri: image.toString()}}
+            style={{width: 70, height: 110}}
           />
         </ImageBackground>
       </View>
@@ -22,24 +30,26 @@ const BookCard = ({ title, author, categories, onPress, image }) => {
             justifyContent: 'space-between',
             width: 180,
           }}>
-          <Text
-            style={{fontSize: 16, fontWeight: '500', color: '#F5F5F5'}}>
+          <Text style={{fontSize: 16, fontWeight: '500', color: '#F5F5F5'}}>
             {title}
           </Text>
-          <FavoriteButton gaya={{ top: 0, right: 0, padding: 2,
-        borderRadius: 7, }} size={{ width:20, height: 20 }} />
+          <FavoriteButton
+            gaya={{top: 0, right: 0, padding: 2, borderRadius: 7}}
+            size={{width: 20, height: 20}}
+          />
         </View>
         <View style={{marginTop: 7}}>
-          <Text style={{fontSize: 12, color: '#F5F5F5'}}>
-            By {author}
-          </Text>
+          <Text style={{fontSize: 12, color: '#F5F5F5'}}>By {author}</Text>
         </View>
         {/* category */}
         <View style={{flexDirection: 'row', marginTop: 10}}>
           {categories.map((category, index) => (
             <Text
               key={index}
-              style={[styles.minicategory, {backgroundColor: category.color}]}>
+              style={[
+                styles.minicategory,
+                {backgroundColor: categoryColors[category.name]},
+              ]}>
               {category.name}
             </Text>
           ))}
@@ -86,7 +96,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 10,
     flexDirection: 'row',
-    alignSelf:'center',
+    alignSelf: 'center',
     backgroundColor: '#0E5381',
     borderRadius: 10,
     overflow: 'hidden',
