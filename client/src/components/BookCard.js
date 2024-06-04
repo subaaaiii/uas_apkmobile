@@ -10,13 +10,15 @@ import {
 import FavoriteButton from './FavoriteButton';
 import {categoryColors} from '../utils/colors';
 
-const BookCard = ({title, author, categories, onPress, image}) => {
+const BookCard = ({title, author, categories, onPress, image, star}) => {
+  // const star = 3.5;
   return (
     <View style={styles.thirdSection}>
       <View>
         <ImageBackground
-          source={require('../assets/images/background.jpg')}
-          style={styles.imagebackground}>
+          source={{uri: image.toString()}}
+          style={styles.imagebackground}
+          blurRadius={70}>
           <Image
             source={{uri: image.toString()}}
             style={{width: 70, height: 110}}
@@ -54,28 +56,21 @@ const BookCard = ({title, author, categories, onPress, image}) => {
             </Text>
           ))}
         </View>
-        <View style={{marginTop: 10, flexDirection: 'row'}}>
+        <View style={{ marginTop: 10, flexDirection: 'row' }}>
+        {Array.from({ length: Math.floor(star) }, (_, index) => (
           <Image
+            key={index}
             source={require('../assets/icons/IconStar.png')}
-            style={{width: 12, height: 12, marginRight: 3}}
+            style={{ width: 12, height: 12, marginRight: 3 }}
           />
-          <Image
-            source={require('../assets/icons/IconStar.png')}
-            style={{width: 12, height: 12, marginRight: 3}}
-          />
-          <Image
-            source={require('../assets/icons/IconStar.png')}
-            style={{width: 12, height: 12, marginRight: 3}}
-          />
-          <Image
-            source={require('../assets/icons/IconStar.png')}
-            style={{width: 12, height: 12, marginRight: 3}}
-          />
+        ))}
+        {star % 1 !== 0 && (
           <Image
             source={require('../assets/icons/IconStar-half.png')}
-            style={{width: 6, height: 11, marginRight: 3}}
+            style={{ width: 6, height: 11, marginRight: 3 }}
           />
-        </View>
+        )}
+      </View>
         <View style={{marginTop: 12}}>
           <TouchableOpacity onPress={onPress}>
             <Text style={styles.primerbutton}>See Details</Text>

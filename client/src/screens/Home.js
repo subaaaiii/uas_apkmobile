@@ -123,11 +123,12 @@ const Home = () => {
           <View style={styles.thirdSection}>
             <View>
               <ImageBackground
-                source={require('../assets/images/background.jpg')}
-                style={styles.imagebackground}>
+                source={{uri: books.images_link}}
+                style={styles.imagebackground}
+                blurRadius={70}>
                 <Image
                   source={{uri: books.images_link}}
-                  style={{width: 90, height: 140}}
+                  style={{width: 90, height: 140, borderRadius: 5}}
                 />
               </ImageBackground>
             </View>
@@ -212,7 +213,7 @@ const Home = () => {
               key={index}
               style={{alignItems: 'center', marginBottom: 7}}
               onPress={() =>
-                navigation.navigate('List', {category: category.name})
+                navigation.navigate('Explore', {category: category.name})
               }>
               <View style={styles.category}>
                 <Image
@@ -246,8 +247,9 @@ const Home = () => {
                         navigation.navigate('Details', {id: book.id})
                       }>
                       <ImageBackground
-                        source={require('../assets/images/background.jpg')}
-                        style={styles.imagebackgroundshadow}>
+                        source={{uri: book.images_link}}
+                        style={styles.imagebackgroundshadow}
+                        blurRadius={70}>
                         <Image
                           source={{uri: book.images_link}}
                           style={styles.sizebook}
@@ -362,6 +364,7 @@ const styles = StyleSheet.create({
   sizebook: {
     width: 120,
     height: 170,
+    borderRadius: 5
   },
   arrivalswrap: {
     flexDirection: 'row',

@@ -18,7 +18,7 @@ const TabItem = ({isFocused, options, onPress, onLongPress, label}) => {
       ) : (
         <IconHome width={25} height={25} />
       );
-    if (label === 'Search')
+    if (label === 'Explore')
       return isFocused ? (
         <IconSearchActive width={25} height={25} />
       ) : (
