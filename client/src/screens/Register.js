@@ -90,7 +90,7 @@ const Signup = () => {
                         onChangeText={setPhone}
                         value={phone}
                         placeholder="Phone Number"
-                        keyboardType="number-pad"
+                        keyboardType="numeric"
                     />
                 </View>
                 <View style={styles.inputContainer}>

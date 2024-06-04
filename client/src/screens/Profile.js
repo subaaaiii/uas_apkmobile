@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, ImageBackg
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { IconEditWhite } from '../assets';
 import axios from 'axios';
+import { launchImageLibrary } from 'react-native-image-picker';
 import { TextInput } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
@@ -11,98 +12,139 @@ import "core-js/stable/atob";
 import { API_URL } from '../utils/constant';
 
 const Profile = () => {
-      const navigation = useNavigation();
-      const [user, setUser] = useState([]);
-      const [isEditing, setIsEditing] = useState(false);
-      const [userId, setUserId] = useState()
-      const [token, setToken] = useState();
-      const fetchUser = async () => {
-        try {
-          const response = await axios.get(`${API_URL}/users/${userId}`);
-          const userData = response.data.data;
-          const modifiedDate = userData.dateofbirth.split(' ')[0];
-          userData.dateofbirth = modifiedDate;
-          setUser(userData);
-        } catch (error) {
-          console.log(error);
-        }
-      }
-      const updateUser = async () => {
-        try {
-          const response = await axios.patch(`${API_URL}/users/${userId}`, user);
-          console.log(response.data)
-          setIsEditing(false);
-        } catch (error) {
-          console.log(error);
-        }
-      };
+  const navigation = useNavigation();
+  const [user, setUser] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [userId, setUserId] = useState();
+  const [photo, setPhoto] = useState(null)
+  const [token, setToken] = useState();
+  const [profilepicture, setProfilePicture] = useState(null)
 
-      const handleLogout = async () => {
-        try {
-          const refreshToken = await AsyncStorage.getItem('refreshToken');
-          const response = await fetch(
-            `${API_URL}/logout?refreshToken=${refreshToken}`,
-            {
-              method: 'DELETE',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            },
-          );
-          if (response.ok) {
-            await AsyncStorage.removeItem('refreshToken');
-            navigation.navigate('Login');
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      };
+  const fetchUserInfo = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/users/${userId}`);
+      const userData = response.data.data;
+      const modifiedDate = userData.dateofbirth.split(' ')[0];
+      userData.dateofbirth = modifiedDate;
+      setUser(userData);
+      setProfilePicture(user.images_link)
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
-      const getNewToken = async () => {
-        try {
-          const refreshToken = await AsyncStorage.getItem('refreshToken');
-          const response = await fetch(
-            `${API_URL}/token?refreshToken=${refreshToken}`,
-            {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            },
-          );
-          const data = await response.json();
-          if (response.ok) {
-            setToken(data.accessToken);
-            const decoded = jwtDecode(data.accessToken);
-            setUserId(decoded.userId);
-          } else {
-            Alert.alert(data.msg);
-          }
-        } catch (error) {
-          console.error(error);
+  const updateUser = async () => {
+    try {
+      const formData = insertFromData();
+      console.log(formData)
+      const response = await axios.patch(`${API_URL}/users/${userId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
         }
-      };
+      });
+      setIsEditing(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-      useFocusEffect(
-        useCallback(() => {
-          setToken(null);
-          setUserId(null);
-    
-          const initialize = async () => {
-            await getNewToken();
-            await fetchUser();
-          };
-    
-          initialize();
-    
-          return () => {
-          };
-        }, [])
+  const insertFromData = () => {
+    const formData = new FormData();
+
+    formData.append('username', user.username);
+    formData.append('email', user.email);
+    formData.append('phone', user.phone);
+    formData.append('dateofbirth', user.dateofbirth);
+
+    if (photo && photo.uri) {
+      const uriParts = photo.uri.split('.');
+      const fileType = uriParts[uriParts.length - 1];
+
+      formData.append('profilepicture', {
+        uri: photo.uri,
+        name: photo.fileName,
+        type: `image/${fileType}`,
+      });
+    }
+    return formData;
+
+  }
+
+  const handleLogout = async () => {
+    try {
+      const refreshToken = await AsyncStorage.getItem('refreshToken');
+      const response = await fetch(
+        `${API_URL}/logout?refreshToken=${refreshToken}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
       );
+      if (response.ok) {
+        await AsyncStorage.removeItem('refreshToken');
+        navigation.navigate('Login');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-      useEffect(() => {
+  const getNewToken = async () => {
+    try {
+      const refreshToken = await AsyncStorage.getItem('refreshToken');
+      const response = await fetch(
+        `${API_URL}/token?refreshToken=${refreshToken}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setToken(data.accessToken);
+        const decoded = jwtDecode(data.accessToken);
+        setUserId(decoded.userId);
+      } else {
+        Alert.alert(data.msg);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleInputImage = async () => {
+    launchImageLibrary({ noData: true }, response => {
+      console.log(response.assets[0]);
+      if (response) {
+        setPhoto(response.assets[0]);
+      }
+    });
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      setToken(null);
+      setUserId(null);
+
+      const initialize = async () => {
+        await getNewToken();
+        await fetchUserInfo();
+      };
+
+      initialize();
+
+      return () => {
+      };
+    }, [])
+  );
+
+  useEffect(() => {
     if (userId) {
-      fetchUser();
+      fetchUserInfo();
     }
   }, [userId]);
 
@@ -140,9 +182,18 @@ const Profile = () => {
           <View style={styles.Container}>
             <View style={styles.ContentContainer}>
               <Image
-                source={require('../assets/images/Cat.jpg')}
+                source={{ uri: user.images_link }}
                 style={styles.ProfilePicture}
               />
+              <TouchableOpacity
+                style={{ backgroundColor: 'green' }}
+                onPress={handleInputImage}
+              >
+                <Image
+                  source={require('../assets/images/user.png')}
+                  style={{ width: 30, height: 30 }}
+                />
+              </TouchableOpacity>
             </View>
             <View style={styles.ContentContainer}>
               <View>
@@ -278,9 +329,9 @@ const Profile = () => {
               </Text>
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity 
-            style={styles.logoutButton}
-            onPress={handleLogout}>
+            <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={handleLogout}>
               <Text style={{ color: 'white', fontSize: 15 }}>
                 LOG OUT
               </Text>

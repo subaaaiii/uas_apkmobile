@@ -107,9 +107,11 @@ const updateUser = async (req, res) => {
         username,
         email,
         phone,
-        dateofbirth,
-        profilepicture
+        dateofbirth
     } = req.body;
+    const foto = req.file;
+    const profilepicture = foto.filename
+    console.log(profilepicture)
     const { id } = req.params;
     try {
         const user = await User.findByPk(id);

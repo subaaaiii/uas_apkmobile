@@ -40,11 +40,19 @@ module.exports = (sequelize, DataTypes) => {
         },
         refreshToken: {
             type: DataTypes.TEXT
-        }
-    },{
+        },
+        images_link: {
+            type: DataTypes.VIRTUAL,
+            get() {
+                return `http://10.0.2.2:1000/images/user/${this.getDataValue(
+                    "profilepicture"
+                )}`;
+            },
+        },
+    }, {
         tableName: 'users'
     }
-);
+    );
 
     return User;
 }

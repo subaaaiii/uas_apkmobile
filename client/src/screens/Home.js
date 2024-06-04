@@ -106,7 +106,6 @@ const Home = () => {
   function refetchData(){
     fetchBooks();
     // fetchCategories();
-    fetchUser();
     setRefresh(false)
   }
   return (

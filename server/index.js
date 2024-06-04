@@ -16,7 +16,9 @@ app.use(express.json()); //middleware biar bisa nerima json
 app.use(cookieParser());
 // app.use(express.static(join(__dirname, "images")));
 app.use("/images/book", express.static('./images/book'))
+app.use("/images/user", express.static('./images/user'))
 app.use(express.urlencoded({ extended: false }));
+
 
 app.use('/books', bookRoutes)
 app.use('/users', userRoutes)
