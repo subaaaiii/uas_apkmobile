@@ -1,8 +1,13 @@
-const { DataTypes } = require("sequelize");
+'use strict';
+const { DataTypes, Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-  const Book = sequelize.define(
-    "Book",
+  class Book extends Model {
+    static associate(models) {
+      Book.hasMany(models.Favorite, { foreignKey: { name: 'id_book' } });
+    }
+  }
+  Book.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -72,6 +77,8 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
+      sequelize,
+      modelName: 'Book',
       tableName: "books",
     }
   );

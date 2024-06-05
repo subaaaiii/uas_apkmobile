@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser')
 
 const bookRoutes = require('./routes/books.js');
 const userRoutes = require('./routes/users.js');
+const favoriteRoutes = require('./routes/favorite.js');
 const categoriesRoutes = require('./routes/categories.js');
 const loginRegister = require('./routes/loginRegister.js')
 
@@ -23,6 +24,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/books', bookRoutes)
 app.use('/users', userRoutes)
 app.use('/categories', categoriesRoutes)
+app.use('/favorite', favoriteRoutes)
 app.use('/', loginRegister)
 
 app.listen(process.env.APP_PORT, ()=>{
