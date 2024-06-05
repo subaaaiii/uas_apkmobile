@@ -29,6 +29,7 @@ const Router = () => {
         <Stack.Screen name='Profile' component={Profile}/>
         <Stack.Screen name='List' component={List}/>
         <Stack.Screen name='FormBook' component={FormBook}/>
+        <Stack.Screen name='AdminBook' component={AdminBook}/>
       </Stack.Navigator>
   )
 }

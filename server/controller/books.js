@@ -1,17 +1,41 @@
 const { Book } = require("../models");
 const fs = require("fs");
+const { Op } = require('sequelize');
 
 const getAllBooks = async (req, res) => {
   try {
-    const book = await Book.findAll();
-    res.status(201).json({
-      message: "get all books success",
-      data: book,
+    const { search } = req.query;
+    const query = {
+      [Op.or]: []
+    };
+    
+    if (search) {
+      query[Op.or].push(
+        { name: { [Op.like]: `%${search}%` } },
+        { author: { [Op.like]: `%${search}%` } },
+        { category1: { [Op.like]: `%${search}%` } },
+        { category2: { [Op.like]: `%${search}%` } },
+        { category3: { [Op.like]: `%${search}%` } }
+      );
+    }
+    
+    let books; 
+
+    if (search) {
+      books = await Book.findAll({ where: query });
+    } else {
+      books = await Book.findAll();
+    }
+
+    res.status(200).json({
+      message: "Get all books success",
+      data: books,
     });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 const findBookById = async (req, res) => {
   try {

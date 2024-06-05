@@ -16,16 +16,18 @@ import BookCard2 from '../components/BookCard2';
 import {categoryColors} from '../utils/colors';
 
 const Explore = ({route}) => {
-  const {category} = route?.params || {category: 'Search'};
-  // const [refresh, setRefresh] = useState(false);
+  const {category} = route?.params || {category: null};
+  const [refresh, setRefresh] = useState(false);
   const navigation = useNavigation();
   // const [books, setBooks] = useState([]);
+  const [searchMode, setSearchMode] =useState(false);
   const [user, setUser] = useState([]);
   const [listbooks, setListBooks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [dropDown, setDropDown] = useState(false);
   const [search, setSearch] = useState('');
   const [searchResult, setSearchResult] = useState('');
+  const ContainerComponent = searchMode ? View : ScrollView;
 
   const Userid = 1; // Sementara, kalo yg login user dgn id = 1
   const fetchUser = async () => {
@@ -45,6 +47,29 @@ const Explore = ({route}) => {
       console.log(error);
     }
   };
+
+  const searchBooks = async (search = '') => {
+    try {
+      const response = await axios.get(`${API_URL}/books`, {
+        params: { search }
+      });
+      setListBooks(response.data.data);
+      if(search != ''){
+        setSearchMode(true);
+      }else {
+        setSearchMode(false);
+      }
+    } catch (error) {
+      console.error('Error fetching books:', error);
+      throw error;
+    }
+  };
+  function refetchData() {
+    fetchBooks();
+    setRefresh(false);
+    setSearchMode(false)
+  }
+
   const fetchCategories = async () => {
     try {
       const response = await axios.get(`${API_URL}/categories`);
@@ -57,7 +82,13 @@ const Explore = ({route}) => {
     fetchBooks();
     fetchCategories();
     fetchUser();
+  
   }, []);
+
+  useEffect(() => {
+    searchBooks(category);
+    setSearchResult(category);
+  }, [category]);
 
   useEffect(() => {
     // console.log('books', books);
@@ -81,9 +112,14 @@ const Explore = ({route}) => {
                 styles.minicategory,
                 {backgroundColor: categoryColors[category.name]},
               ]}
-              onPress={() =>
-                navigation.navigate('List', {category: category.name})
-              }>
+              // onPress={() =>
+              //   navigation.navigate('List', {category: category.name})
+              // }
+              onPress={() => {searchBooks(category.name);
+                setSearchResult(category.name);
+                toggleDropdown();
+              }}
+              >
               <Text style={{color: '#F5F5F5'}}>{category.name}</Text>
             </TouchableOpacity>
           ))}
@@ -92,7 +128,9 @@ const Explore = ({route}) => {
     );
   };
   return (
-    <ScrollView style={{flex: 1}}>
+    <ScrollView style={{flex: 1}} refreshControl={
+      <RefreshControl refreshing={refresh} onRefresh={refetchData} />
+    }>
       <View
         style={{
           // marginTop: 25,
@@ -110,7 +148,6 @@ const Explore = ({route}) => {
             style={{
               flexDirection: 'row',
               backgroundColor: '#DFE4E7',
-
               borderRadius: 10,
               padding: 10,
               paddingRight: 0
@@ -125,6 +162,7 @@ const Explore = ({route}) => {
               onChangeText={value => setSearch(value)}
               onSubmitEditing={() => {
                 setSearchResult(search);
+                searchBooks(search);
               }}></TextInput>
           </View>
           <TouchableOpacity onPress={toggleDropdown}>
@@ -153,18 +191,20 @@ const Explore = ({route}) => {
             </View>
           )}
         </View>
+        {!searchMode &&(
         <View style={{marginTop: 10}}>
           <Text style={{fontSize: 14, fontWeight: 400, color: '#F5F5F5'}}>
             Newest
           </Text>
-        </View>
-        <ScrollView
-          horizontal
+        </View>)}
+        <ContainerComponent
+          horizontal={!searchMode}
           style={{
             display: 'flex',
+            flex: 1,
             flexDirection: 'row',
             marginTop: 15,
-            paddingBottom: 30,
+            flexWrap: searchMode ? 'wrap' : 'nowrap',
           }}>
           {listbooks.map((book, index) => (
             <BookCard2
@@ -181,8 +221,10 @@ const Explore = ({route}) => {
               onPress={() => navigation.navigate('Details',{id: book.id})}
             />
           ))}
-        </ScrollView>
-        <View style={{marginTop: 10}}>
+        </ContainerComponent>
+        {!searchMode &&(
+          <View>
+            <View style={{marginTop: 10}}>
           <Text style={{fontSize: 14, fontWeight: 400, color: '#F5F5F5'}}>
             Popular
           </Text>
@@ -211,6 +253,8 @@ const Explore = ({route}) => {
             />
           ))}
         </ScrollView>
+          </View>
+        )}
         {dropDown && renderDropdownContent()}
       </View>
     </ScrollView>
@@ -223,6 +267,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: '#043657',
     paddingBottom: 30,
+    minHeight: 500
   },
 
   firstSection: {

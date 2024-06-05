@@ -77,10 +77,11 @@ const styles = StyleSheet.create({
     marginRight: 20,
     padding: 10,
     // flexDirection: 'row',
-    alignSelf: 'center',
+    // alignSelf: 'center',
     backgroundColor: '#0E5381',
     borderRadius: 10,
     // overflow: 'hidden',
+    marginBottom: 20
   },
   categorySection: {
     height: 440,
