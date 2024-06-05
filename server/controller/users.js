@@ -217,7 +217,7 @@ const registerUser = async (req, res) => {
             password: hashPassword,
             phone: phone,
             dateofbirth: dateofbirth,
-            profilepicture: "noimage.png",
+            profilepicture: "default.png",
         });
         res.json({ msg: "Register Success" });
     } catch (error) {

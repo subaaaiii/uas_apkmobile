@@ -1,13 +1,14 @@
+import "core-js/stable/atob";
+import axios from 'axios';
 import React, { useState, useEffect, useCallback } from 'react';
-import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, ImageBackground, Alert } from 'react-native';
+import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, ImageBackground, Alert, Platform } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { IconEditWhite, IconCamera, IconCancel } from '../assets';
-import axios from 'axios';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { ActivityIndicator, TextInput } from 'react-native-paper';
+import { ActivityIndicator, Button, TextInput } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
-import "core-js/stable/atob";
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { API_URL } from '../utils/constant';
 
@@ -19,8 +20,29 @@ const Profile = () => {
   const [photo, setPhoto] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState();
-  const [refreshing, setRefreshing] = useState(false);  // State untuk refresh
+  const [refreshing, setRefreshing] = useState(false);
   const [userDB, setUserDB] = useState([]);
+  const [date, setDate] = useState(new Date());
+  const [mode, setMode] = useState('date');
+  const [show, setShow] = useState(false);
+  const [text, setText] = useState('Empty')
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShow(Platform.OS === 'IOS');
+    setDate(currentDate);
+
+    let tempDate = new Date(currentDate);
+    let fDate = tempDate.getFullYear() + '-' + (tempDate.getMonth() + 1) + '-' + tempDate.getDate();
+    setText(fDate)
+    setUser({ ...user, dateofbirth: fDate })
+    console.log(fDate)
+  }
+
+  const showMode = (currentMode) => {
+    setShow(true);
+    setMode(currentMode);
+  }
 
   const fetchUserInfo = async () => {
     try {
@@ -30,7 +52,7 @@ const Profile = () => {
       userData.dateofbirth = modifiedDate;
       setUser(userData);
       setUserDB(userData);
-      setPhoto(userDB.images_link)
+      setPhoto(userDB.images_link);
     } catch (error) {
       console.log(error);
     }
@@ -155,7 +177,7 @@ const Profile = () => {
     if (userId) {
       fetchUserInfo();
     }
-    setRefreshing(false)
+    setRefreshing(false);
   }, [userId, refreshing]);
 
 
@@ -179,7 +201,10 @@ const Profile = () => {
             {!isEditing ? (
               <View style={{ flexBasis: 100, alignItems: 'center' }}>
                 <TouchableOpacity
-                  onPress={() => setIsEditing(true)}>
+                  onPress={() => {
+                    setIsEditing(true)
+                    setPhoto(null)
+                  }}>
                   <IconEditWhite width={25} height={25} />
                 </TouchableOpacity>
               </View>
@@ -188,8 +213,8 @@ const Profile = () => {
                 <TouchableOpacity
                   onPress={() => {
                     setIsEditing(false)
-                    setPhoto(null)
                     setUser(userDB)
+                    setPhoto(null)
                   }}
                 >
                   <IconCancel width={25} height={25} />
@@ -224,23 +249,8 @@ const Profile = () => {
                         style={styles.ProfilePicture}
                       />
                     )
-
                   }
 
-                  {!isEditing ? (
-                    <View>
-
-                    </View>
-                  ) : (
-                    <View>
-                      <TouchableOpacity
-                        style={styles.bgEdit}
-                        onPress={handleInputImage}
-                      >
-                        <IconCamera width={25} height={25} />
-                      </TouchableOpacity>
-                    </View>
-                  )}
                   {!isEditing ? (
                     <View>
 
@@ -376,13 +386,14 @@ const Profile = () => {
                 <View style={{ flex: 1 }}>
                   <Text style={styles.UserDataHeader}>Date of Birth</Text>
                   {isEditing ? (
-                    <TextInput style={styles.editInput}
-                      underlineColor='white'
-                      activeUnderlineColor="white"
-                      left={IconEditWhite}
-                      defaultValue={userDB.dateofbirth}
-                      keyboardType="phone-pad"
-                      onChangeText={(text) => setUser({ ...user, dateofbirth: text })} />
+                    <TouchableOpacity
+                      style={{ backgroundColor: '#ececec', padding: 12 }}
+                      onPress={() => showMode('date')}
+                    >
+                      <Text style={{ fontSize: 16, color: 'black' }}>
+                        {user.dateofbirth}
+                      </Text>
+                    </TouchableOpacity>
                   ) : (
                     <Text style={styles.UserData}>{userDB.dateofbirth}</Text>
                   )}
@@ -390,6 +401,21 @@ const Profile = () => {
               </View>
             </View>
             {/* 2nd section */}
+
+            <View>
+              {show && (
+                <DateTimePicker
+                  testID='dateTimePicker'
+                  value={date}
+                  mode={mode}
+                  is24Hour={true}
+                  display='default'
+                  onChange={onChange}
+                />)}
+            </View>
+
+
+
 
             <View style={{ alignItems: 'center' }}>
               {isEditing ? (
