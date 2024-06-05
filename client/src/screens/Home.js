@@ -37,6 +37,7 @@ const Home = () => {
   const [token, setToken] = useState('');
   const [userId, setUserId] = useState();
   const [listbooks, setListBooks] = useState([]);
+  const [listFavoriteBooks, setListFavoriteBooks] = useState([]);
   const [categories, setCategories] = useState([]);
   const categoryImages = {
     adventure,
@@ -92,10 +93,25 @@ const Home = () => {
       console.log(error);
     }
   };
+
+  const fetchBookFavoriteOfUser = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/favorite/1`);
+      setListFavoriteBooks(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const isFavorite = (bookId) => {
+    return listFavoriteBooks.some(favBook => favBook.Book.id === bookId);
+  };
+
   useEffect(() => {
     fetchBooks();
     fetchCategories();
     getNewToken();
+    fetchBookFavoriteOfUser()
   }, []);
 
   useEffect(() => {
@@ -274,7 +290,8 @@ const Home = () => {
                         />
                       </ImageBackground>
                     </TouchableOpacity>
-                    <FavoriteButton gaya={{top: 10, right: 15}} />
+                    <FavoriteButton gaya={{top: 10, right: 15}} favorite={isFavorite(book.id)}
+                    bookId={book.id} />
                   </View>
                 );
               })}

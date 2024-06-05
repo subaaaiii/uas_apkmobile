@@ -21,6 +21,16 @@ module.exports = {
   addToFavorite: async (req, res) => {
     try {
       const { id_book, id_user } = req.body;
+      const existingFavorite = await Favorite.findOne({
+        where: {
+          id_user: id_user,
+          id_book: id_book,
+        },
+      });
+
+      if (existingFavorite) {
+        return res.status(409).json({ message: "Favorite already exists" });
+      }
       const data = await Favorite.create({
         id_book,
         id_user,
@@ -35,7 +45,7 @@ module.exports = {
   },
   removeFromFavorite: async (req, res) => {
     try {
-      const { id_book, id_user } = req.body;
+      const { id_book, id_user } = req.params;
       await Favorite.destroy({
         where: {
           id_book,

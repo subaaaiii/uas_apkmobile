@@ -1,7 +1,8 @@
 require('dotenv').config()
 const express = require('express');
 const cors = require('cors');
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 
 const bookRoutes = require('./routes/books.js');
 const userRoutes = require('./routes/users.js');
@@ -13,6 +14,7 @@ const app = express();
 
 // app.method(path,handler);
 app.use(cors());
+app.use(bodyParser.json());
 app.use(express.json()); //middleware biar bisa nerima json
 app.use(cookieParser());
 // app.use(express.static(join(__dirname, "images")));

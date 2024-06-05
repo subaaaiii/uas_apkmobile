@@ -8,6 +8,6 @@ const router = express.Router();
 
 router.get('/:id',favoriteController.getAllFavorite)
 router.post('/', favoriteController.addToFavorite)
-router.delete('/', favoriteController.removeFromFavorite)
+router.delete('/:id_user/:id_book', favoriteController.removeFromFavorite)
 
 module.exports = router;

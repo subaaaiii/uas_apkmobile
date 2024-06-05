@@ -10,7 +10,7 @@ import {
 import FavoriteButton from './FavoriteButton';
 import {categoryColors} from '../utils/colors';
 
-const BookCard = ({title, author, categories, onPress, image, star}) => {
+const BookCard = ({title, author, categories, onPress, image, star, favorite,bookId}) => {
   // const star = 3.5;
   return (
     <View style={styles.thirdSection}>
@@ -38,6 +38,8 @@ const BookCard = ({title, author, categories, onPress, image, star}) => {
           <FavoriteButton
             gaya={{top: 0, right: 0, padding: 2, borderRadius: 7}}
             size={{width: 20, height: 20}}
+            favorite={favorite}
+            bookId={bookId}
           />
         </View>
         <View style={{marginTop: 7}}>

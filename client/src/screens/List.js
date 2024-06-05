@@ -17,13 +17,14 @@ import {categoryColors} from '../utils/colors';
 
 const List = () => {
   const navigation = useNavigation();
+  const [refresh, setRefresh] = useState(false);
   // const [books, setBooks] = useState([]);
   const [user, setUser] = useState([]);
   const [listbooks, setListBooks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [dropDown, setDropDown] = useState(false);
-  const [search, setSearch] = useState('');
-  const [searchResult, setSearchResult] = useState('');
+  // const [search, setSearch] = useState('');
+  // const [searchResult, setSearchResult] = useState('');
 
   const Userid = 1; // Sementara, kalo yg login user dgn id = 1
   const fetchUser = async () => {
@@ -37,7 +38,7 @@ const List = () => {
 
   const fetchBooks = async () => {
     try {
-      const response = await axios.get(`${API_URL}/books`);
+      const response = await axios.get(`${API_URL}/favorite/${Userid}`);
       setListBooks(response.data.data);
     } catch (error) {
       console.log(error);
@@ -67,6 +68,12 @@ const List = () => {
     setDropDown(!dropDown);
   };
 
+  function refetchData() {
+    fetchBooks();
+    // fetchCategories();
+    setRefresh(false);
+  }
+
   renderDropdownContent = () => {
     return (
       <View style={styles.dropdownContent}>
@@ -90,7 +97,9 @@ const List = () => {
     );
   };
   return (
-    <ScrollView style={{flex: 1}}>
+    <ScrollView style={{flex: 1}} refreshControl={
+      <RefreshControl refreshing={refresh} onRefresh={refetchData} />
+    }>
       <View style={styles.header}>
         <View style={styles.firstSection}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -113,7 +122,7 @@ const List = () => {
             />
           </TouchableOpacity>
         </View>
-        <View style={{flexDirection: 'row', marginTop: 10}}>
+        {/* <View style={{flexDirection: 'row', marginTop: 10}}>
           {searchResult && (
             <View style={{flexDirection: 'row'}}>
               <Text style={{color: '#f5f5f5'}}>Search Result For </Text>
@@ -122,20 +131,22 @@ const List = () => {
               </Text>
             </View>
           )}
-        </View>
+        </View> */}
         {listbooks.map((book, index) => (
           <BookCard
             key={index}
-            title={book.name}
-            author={book.author}
-            image={book.images_link}
-            star={book.rating}
+            title={book.Book.name}
+            author={book.Book.author}
+            image={book.Book.images_link}
+            star={book.Book.rating}
             categories={[
-              {name: book.category1},
-              {name: book.category2},
-              {name: book.category3},
+              {name: book.Book.category1},
+              {name: book.Book.category2},
+              {name: book.Book.category3},
             ]}
-            onPress={() => navigation.navigate('Details')}
+            favorite={true}
+            bookId={book.Book.id}
+            onPress={() => navigation.navigate('Details',{id:book.Book.id })}
           />
         ))}
         {dropDown && renderDropdownContent()}
@@ -150,6 +161,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: '#043657',
     paddingBottom: 30,
+    minHeight: 600
   },
 
   firstSection: {

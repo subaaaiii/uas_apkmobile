@@ -17,17 +17,19 @@ import {categoryColors} from '../utils/colors';
 
 const Explore = ({route}) => {
   const {category} = route?.params || {category: null};
+  // const initialCategory = route?.params?.category || '';
+  // const [category, setCategory] = useState(initialCategory);
   const [refresh, setRefresh] = useState(false);
   const navigation = useNavigation();
+  const [listFavoriteBooks, setListFavoriteBooks] = useState([]);
   // const [books, setBooks] = useState([]);
-  const [searchMode, setSearchMode] =useState(false);
+  const [searchMode, setSearchMode] = useState(false);
   const [user, setUser] = useState([]);
   const [listbooks, setListBooks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [dropDown, setDropDown] = useState(false);
   const [search, setSearch] = useState('');
   const [searchResult, setSearchResult] = useState('');
-  const ContainerComponent = searchMode ? View : ScrollView;
 
   const Userid = 1; // Sementara, kalo yg login user dgn id = 1
   const fetchUser = async () => {
@@ -43,9 +45,23 @@ const Explore = ({route}) => {
     try {
       const response = await axios.get(`${API_URL}/books`);
       setListBooks(response.data.data);
+      // setSearchMode(false);
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const fetchBookFavoriteOfUser = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/favorite/${Userid}`);
+      setListFavoriteBooks(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const isFavorite = (bookId) => {
+    return listFavoriteBooks.some(favBook => favBook.Book.id === bookId);
   };
 
   const searchBooks = async (search = '') => {
@@ -54,7 +70,7 @@ const Explore = ({route}) => {
         params: { search }
       });
       setListBooks(response.data.data);
-      if(search != ''){
+      if(search){
         setSearchMode(true);
       }else {
         setSearchMode(false);
@@ -64,7 +80,7 @@ const Explore = ({route}) => {
       throw error;
     }
   };
-  function refetchData() {
+  const refetchData =() =>{
     fetchBooks();
     setRefresh(false);
     setSearchMode(false);
@@ -82,9 +98,10 @@ const Explore = ({route}) => {
   };
   useEffect(() => {
     fetchBooks();
-    fetchCategories();
     fetchUser();
-  
+    fetchCategories();
+    fetchBookFavoriteOfUser();
+    setSearchMode(false);
   }, []);
 
   useEffect(() => {
@@ -93,9 +110,10 @@ const Explore = ({route}) => {
   }, [category]);
 
   useEffect(() => {
-    // console.log('books', books);
     console.log('listbooks', listbooks);
     console.log('categories list', categories);
+    console.log('search mode', searchMode);
+    console.log('category', category);
   }, [listbooks]);
 
   toggleDropdown = () => {
@@ -114,9 +132,6 @@ const Explore = ({route}) => {
                 styles.minicategory,
                 {backgroundColor: categoryColors[category.name]},
               ]}
-              // onPress={() =>
-              //   navigation.navigate('List', {category: category.name})
-              // }
               onPress={() => {searchBooks(category.name);
                 setSearchResult(category.name);
                 setSearch('');
@@ -130,6 +145,8 @@ const Explore = ({route}) => {
       </View>
     );
   };
+  const ContainerComponent = searchMode ? View : ScrollView;
+
   return (
     <ScrollView style={{flex: 1}} refreshControl={
       <RefreshControl refreshing={refresh} onRefresh={refetchData} />
@@ -230,6 +247,8 @@ const Explore = ({route}) => {
                   {name: book.category2},
                   {name: book.category3},
                 ]}
+                bookId={book.id}
+                favorite={isFavorite(book.id)}
                 onPress={() => navigation.navigate('Details',{id: book.id})}
               />
             ))
@@ -262,6 +281,8 @@ const Explore = ({route}) => {
                 {name: book.category2},
                 {name: book.category3},
               ]}
+              favorite={isFavorite(book.id)}
+              bookId={book.id}
               onPress={() => navigation.navigate('Details')}
             />
           ))}
