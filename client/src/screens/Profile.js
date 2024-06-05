@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, ImageBackground, Alert } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { IconEditWhite } from '../assets';
+import { IconEditWhite, IconCamera } from '../assets';
 import axios from 'axios';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { TextInput } from 'react-native-paper';
@@ -185,20 +185,29 @@ const Profile = () => {
                 source={{ uri: user.images_link }}
                 style={styles.ProfilePicture}
               />
-              <TouchableOpacity
-                style={{ backgroundColor: 'green' }}
-                onPress={handleInputImage}
-              >
-                <Image
-                  source={require('../assets/images/user.png')}
-                  style={{ width: 30, height: 30 }}
-                />
-              </TouchableOpacity>
+              <View>
+                <TouchableOpacity
+                  style={styles.bgEdit}
+                  onPress={handleInputImage}
+                >
+                  <IconCamera width={25} height={25} />
+                </TouchableOpacity>
+              </View>
             </View>
             <View style={styles.ContentContainer}>
               <View>
                 <Text style={{ fontSize: 20, color: 'white' }}>{user.username}</Text>
               </View>
+            </View>
+
+            <View>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('AdminBook')}
+              >
+                <Text>
+                  Go to admin
+                </Text>
+              </TouchableOpacity>
             </View>
 
             <View style={{ flexDirection: 'row', margin: 20 }}>
@@ -444,8 +453,16 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     paddingLeft: 40,
     paddingRight: 40
+  },
+  bgEdit: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 5,
+    alignItems: 'center',
+    marginLeft: 100,
+    marginTop: -40,
+    position: 'absolute'
   }
-
 })
 
 export default Profile;
