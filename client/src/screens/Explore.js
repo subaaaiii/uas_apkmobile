@@ -67,7 +67,9 @@ const Explore = ({route}) => {
   function refetchData() {
     fetchBooks();
     setRefresh(false);
-    setSearchMode(false)
+    setSearchMode(false);
+    setSearchResult('');
+    setSearch('');
   }
 
   const fetchCategories = async () => {
@@ -117,6 +119,7 @@ const Explore = ({route}) => {
               // }
               onPress={() => {searchBooks(category.name);
                 setSearchResult(category.name);
+                setSearch('');
                 toggleDropdown();
               }}
               >
@@ -206,21 +209,31 @@ const Explore = ({route}) => {
             marginTop: 15,
             flexWrap: searchMode ? 'wrap' : 'nowrap',
           }}>
-          {listbooks.map((book, index) => (
-            <BookCard2
-              key={index}
-              title={book.name}
-              author={book.author}
-              image={book.images_link}
-              star={book.rating}
-              categories={[
-                {name: book.category1},
-                {name: book.category2},
-                {name: book.category3},
-              ]}
-              onPress={() => navigation.navigate('Details',{id: book.id})}
-            />
-          ))}
+          {listbooks.length === 0 ?(
+            <View style={{ flex: 1, alignSelf: 'center',alignItems: 'center' }}>
+              <Image
+                source={require('../assets/images/sad.png')}
+                style={{width: 200, height: 200, marginTop: 40}}
+              />
+              <Text style={{ marginTop: 5, fontWeight: 600, fontSize: 18, color: WARNA_DISABLE }}>No Book Found...</Text>
+            </View>
+          ): (
+            listbooks.map((book, index) => (
+              <BookCard2
+                key={index}
+                title={book.name}
+                author={book.author}
+                image={book.images_link}
+                star={book.rating}
+                categories={[
+                  {name: book.category1},
+                  {name: book.category2},
+                  {name: book.category3},
+                ]}
+                onPress={() => navigation.navigate('Details',{id: book.id})}
+              />
+            ))
+          )}
         </ContainerComponent>
         {!searchMode &&(
           <View>
