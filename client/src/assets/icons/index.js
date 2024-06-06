@@ -8,6 +8,19 @@ import IconDelete from './delete.svg'
 import IconEdit from './edit.svg'
 import IconEditWhite from './editWhite.svg'
 import IconCamera from './camera.svg'
+import IconCancel from './cancel.svg'
 
 
-export {IconHome, IconHomeActive, IconSearch, IconSearchActive, IconWishlistActive, IconWishlist, IconDelete, IconEdit, IconEditWhite, IconCamera}
+export {
+    IconHome,
+    IconHomeActive,
+    IconSearch,
+    IconSearchActive,
+    IconWishlistActive,
+    IconWishlist,
+    IconDelete,
+    IconEdit,
+    IconEditWhite,
+    IconCamera,
+    IconCancel
+}

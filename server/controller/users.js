@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const jwt = require('jsonwebtoken');
 const { refreshToken } = require('./refreshToken')
+const fs = require("fs");
 
 const getAllUsers = async (req, res) => {
     try {
@@ -110,9 +111,18 @@ const updateUser = async (req, res) => {
         dateofbirth
     } = req.body;
     const foto = req.file;
-    const profilepicture = foto.filename
-    console.log(profilepicture)
     const { id } = req.params;
+    const imageBeforeUpdate = await User.findOne({
+        attributes: ["profilepicture"],
+        where: {
+            id: id,
+        },
+    });
+    if (foto) {
+        profilepicture = foto.filename;
+    } else {
+        profilepicture = imageBeforeUpdate.profilepicture
+    }
     try {
         const user = await User.findByPk(id);
         if (user) {
@@ -130,6 +140,9 @@ const updateUser = async (req, res) => {
                     },
                 }
             );
+            if (foto && imageBeforeUpdate.profilepicture != "default.png") {
+                fs.unlinkSync("images/user/" + imageBeforeUpdate.profilepicture);
+            }
             res.status(201).json({
                 message: "update user success",
                 data: user
@@ -169,47 +182,48 @@ const deleteUser = async (req, res) => {
 
 const registerUser = async (req, res) => {
     const { username, email, password, confPassword, phone, dateofbirth } = req.body;
-  
+
     if (!username.trim() || !email.trim() || !password.trim() || !confPassword.trim()) {
-      return res.status(400).json({ message: "Input fields cannot be empty" });
+        return res.status(400).json({ message: "Input fields cannot be empty" });
     }
-  
+
     if (password !== confPassword) {
-      return res.status(400).json({ message: "Passwords do not match" });
+        return res.status(400).json({ message: "Passwords do not match" });
     }
-  
+
     const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/;
     if (!passwordRegex.test(password)) {
-      return res.status(400).json({ message: "Password must be at least 8 characters long, include at least one uppercase letter and one number" });
+        return res.status(400).json({ message: "Password must be at least 8 characters long, include at least one uppercase letter and one number" });
     }
-  
+
     if (password !== confPassword)
-      return res.status(400).json({ message: "Password not match" });
-  
+        return res.status(400).json({ message: "Password not match" });
+
     const existingUser = await User.findAll({
-      where: {
-        email: email,
-      },
+        where: {
+            email: email,
+        },
     });
     if (existingUser.length > 0)
-      return res.status(400).json({ message: "Email already registered" });
-  
+        return res.status(400).json({ message: "Email already registered" });
+
     const salt = await bcrypt.genSalt();
     const hashPassword = await bcrypt.hash(password, salt);
-  
+
     try {
-      await User.create({
-        username: username,
-        email: email,
-        password: hashPassword,
-        phone: phone,
-        dateofbirth: dateofbirth
-      });
-      res.json({ msg: "Register Success" });
+        await User.create({
+            username: username,
+            email: email,
+            password: hashPassword,
+            phone: phone,
+            dateofbirth: dateofbirth,
+            profilepicture: "default.png",
+        });
+        res.json({ msg: "Register Success" });
     } catch (error) {
-      console.log(error);
+        console.log(error);
     }
-  };
+};
 
 const loginUser = async (req, res) => {
     try {

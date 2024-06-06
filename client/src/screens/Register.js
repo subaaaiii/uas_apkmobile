@@ -12,6 +12,7 @@ import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, StackActions } from '@react-navigation/native';
 import { API_URL } from '../utils/constant';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const Signup = () => {
     const navigation = useNavigation();
@@ -20,9 +21,29 @@ const Signup = () => {
     const [password, setPassword] = useState('');
     const [confPassword, setconfPassword] = useState('');
     const [phone, setPhone] = useState(null);
-    const [date, setDate] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [errorText, setErrorText] = useState('');
+    const [date, setDate] = useState(new Date());
+    const [mode, setMode] = useState('date');
+    const [show, setShow] = useState(false);
+    const [text, setText] = useState('Date of Birth')
+
+    const onChange = (event, selectedDate) => {
+        const currentDate = selectedDate || date;
+        setShow(Platform.OS === 'IOS');
+        setDate(currentDate);
+
+        let tempDate = new Date(currentDate);
+        let fDate = tempDate.getFullYear() + '-' + (tempDate.getMonth() + 1) + '-' + tempDate.getDate();
+        setText(fDate)
+        setUser({ ...user, dateofbirth: fDate })
+        console.log(fDate)
+    }
+
+    const showMode = (currentMode) => {
+        setShow(true);
+        setMode(currentMode);
+    }
 
     const goToLogin = () => {
         navigation.dispatch(StackActions.replace('Login'));
@@ -89,18 +110,19 @@ const Signup = () => {
                         style={styles.input}
                         onChangeText={setPhone}
                         value={phone}
-                        placeholder="Phone Number"
+                        placeholder="Phone Number (Ex: 621234)"
                         keyboardType="numeric"
                     />
                 </View>
                 <View style={styles.inputContainer}>
-                    <TextInput
-                        style={styles.input}
-                        onChangeText={setDate}
-                        value={date}
-                        placeholder="Date of Birth"
-                        keyboardType="number-pad"
-                    />
+                    <TouchableOpacity
+                        style={[styles.input, {marginVertical: 15, paddingHorizontal: 5, marginRight: 45,}]}
+                        onPress={() => showMode('date')}
+                    >
+                        <Text style={[styles.input, {color: 'black'}]}>
+                            {text}
+                        </Text>
+                    </TouchableOpacity>
                 </View>
                 <View style={styles.inputContainer}>
                     <TextInput
@@ -136,6 +158,17 @@ const Signup = () => {
                     </TouchableOpacity>
                 </View>
             </View>
+
+            {show && (
+                <DateTimePicker
+                    testID='dateTimePicker'
+                    value={date}
+                    mode={mode}
+                    is24Hour={true}
+                    display='default'
+                    onChange={onChange}
+                />)}
+
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -198,10 +231,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: 'white',
         borderRadius: 15,
-        marginVertical: 10,
-        paddingHorizontal: 10,
         borderColor: 'black',
         borderWidth: 1,
+        marginVertical: 10,
+        paddingHorizontal: 10,
         marginLeft: 45,
         marginRight: 45,
     },

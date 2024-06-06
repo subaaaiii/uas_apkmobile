@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, ImageBackground, Alert } from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { IconEditWhite, IconCamera } from '../assets';
+import "core-js/stable/atob";
 import axios from 'axios';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, ImageBackground, Alert, Platform } from 'react-native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { IconEditWhite, IconCamera, IconCancel } from '../assets';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { TextInput } from 'react-native-paper';
+import { ActivityIndicator, Button, TextInput } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
-import "core-js/stable/atob";
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { API_URL } from '../utils/constant';
 
@@ -16,9 +17,32 @@ const Profile = () => {
   const [user, setUser] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [userId, setUserId] = useState();
-  const [photo, setPhoto] = useState(null)
+  const [photo, setPhoto] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState();
-  const [profilepicture, setProfilePicture] = useState(null)
+  const [refreshing, setRefreshing] = useState(false);
+  const [userDB, setUserDB] = useState([]);
+  const [date, setDate] = useState(new Date());
+  const [mode, setMode] = useState('date');
+  const [show, setShow] = useState(false);
+  const [text, setText] = useState('Empty')
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShow(Platform.OS === 'IOS');
+    setDate(currentDate);
+
+    let tempDate = new Date(currentDate);
+    let fDate = tempDate.getFullYear() + '-' + (tempDate.getMonth() + 1) + '-' + tempDate.getDate();
+    setText(fDate)
+    setUser({ ...user, dateofbirth: fDate })
+    console.log(fDate)
+  }
+
+  const showMode = (currentMode) => {
+    setShow(true);
+    setMode(currentMode);
+  }
 
   const fetchUserInfo = async () => {
     try {
@@ -27,7 +51,8 @@ const Profile = () => {
       const modifiedDate = userData.dateofbirth.split(' ')[0];
       userData.dateofbirth = modifiedDate;
       setUser(userData);
-      setProfilePicture(user.images_link)
+      setUserDB(userData);
+      setPhoto(userDB.images_link);
     } catch (error) {
       console.log(error);
     }
@@ -43,6 +68,8 @@ const Profile = () => {
         }
       });
       setIsEditing(false);
+      handleRefresh();
+      setIsLoading(true);
     } catch (error) {
       console.log(error);
     }
@@ -106,6 +133,7 @@ const Profile = () => {
       const data = await response.json();
       if (response.ok) {
         setToken(data.accessToken);
+
         const decoded = jwtDecode(data.accessToken);
         setUserId(decoded.userId);
       } else {
@@ -114,6 +142,10 @@ const Profile = () => {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
   };
 
   const handleInputImage = async () => {
@@ -127,229 +159,288 @@ const Profile = () => {
 
   useFocusEffect(
     useCallback(() => {
-      setToken(null);
-      setUserId(null);
-
       const initialize = async () => {
         await getNewToken();
         await fetchUserInfo();
+        await getNewToken();
+        setIsLoading(false);
       };
 
       initialize();
 
       return () => {
       };
-    }, [])
+    }, [refreshing])
   );
 
   useEffect(() => {
     if (userId) {
       fetchUserInfo();
     }
-  }, [userId]);
+    setRefreshing(false);
+  }, [userId, refreshing]);
 
 
   return (
-    <ScrollView style={styles.Profile}>
-
-      {/* Header */}
-      <View style={styles.HeadersContainer}>
-        <TouchableOpacity style={styles.BackButton} onPress={() => navigation.goBack()}>
-          <Image
-            source={require('../assets/icons/IconBack.png')}
-            style={{ width: 30, height: 30 }}
-          />
-        </TouchableOpacity>
-
-        <Text style={styles.Headers}>Profile</Text>
-        <View style={{ flexBasis: 100, alignItems: 'center' }}>
-          <TouchableOpacity
-            onPress={() => setIsEditing(true)}>
-            <IconEditWhite width={25} height={25} />
-          </TouchableOpacity>
+    <View style={styles.Profile}>
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" />
         </View>
-      </View>
-      {/* Header */}
-
-      {/* 1st section */}
-      <View>
-        <ImageBackground
-          source={require('../assets/images/bg.png')}
-          resizeMode="cover"
-          style={{ flex: 1 }}
-          imageStyle={styles.ImageBackground}
-        >
-          <View style={styles.Container}>
-            <View style={styles.ContentContainer}>
+      ) : (
+        <ScrollView>
+          <View style={styles.HeadersContainer}>
+            <TouchableOpacity style={styles.BackButton} onPress={() => navigation.goBack()}>
               <Image
-                source={{ uri: user.images_link }}
-                style={styles.ProfilePicture}
+                source={require('../assets/icons/IconBack.png')}
+                style={{ width: 30, height: 30 }}
               />
-              <View>
+            </TouchableOpacity>
+
+            <Text style={styles.Headers}>Profile</Text>
+            {!isEditing ? (
+              <View style={{ flexBasis: 100, alignItems: 'center' }}>
                 <TouchableOpacity
-                  style={styles.bgEdit}
-                  onPress={handleInputImage}
-                >
-                  <IconCamera width={25} height={25} />
+                  onPress={() => {
+                    setIsEditing(true)
+                    setPhoto(null)
+                  }}>
+                  <IconEditWhite width={25} height={25} />
                 </TouchableOpacity>
               </View>
-            </View>
-            <View style={styles.ContentContainer}>
-              <View>
-                <Text style={{ fontSize: 20, color: 'white' }}>{user.username}</Text>
+            ) : (
+              <View style={{ flexBasis: 100, alignItems: 'center' }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setIsEditing(false)
+                    setUser(userDB)
+                    setPhoto(null)
+                  }}
+                >
+                  <IconCancel width={25} height={25} />
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
+          <View>
+            <ImageBackground
+              source={require('../assets/images/bg.png')}
+              resizeMode="cover"
+              style={{ flex: 1 }}
+              imageStyle={styles.ImageBackground}
+            >
+              <View style={styles.Container}>
+                <View style={styles.ContentContainer}>
+                  {
+                    !isEditing ? (
+                      <Image
+                        source={{ uri: userDB.images_link }}
+                        style={styles.ProfilePicture}
+                      />
+                    ) : !photo ? (
+                      <Image
+                        source={{ uri: userDB.images_link }}
+                        style={styles.ProfilePicture}
+                      />
+                    ) : (
+                      <Image
+                        source={photo}
+                        style={styles.ProfilePicture}
+                      />
+                    )
+                  }
+
+                  {!isEditing ? (
+                    <View>
+
+                    </View>
+                  ) : (
+                    <View>
+                      <TouchableOpacity
+                        style={styles.bgEdit}
+                        onPress={handleInputImage}
+                      >
+                        <IconCamera width={25} height={25} />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+                <View style={styles.ContentContainer}>
+                  <View>
+                    <Text style={{ fontSize: 20, color: 'white' }}>{userDB.username}</Text>
+                  </View>
+                </View>
+
+                <View>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('AdminBook')}
+                  >
+                    <Text>
+                      Go to admin
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={{ flexDirection: 'row', margin: 20 }}>
+                  <View style={{ flexDirection: 'row', borderRightWidth: 0.5, padding: 10, borderColor: 'white' }}>
+                    <Text style={styles.FollowValue}>4</Text>
+                    <Text style={styles.Follow}>Followers</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', padding: 10 }}>
+                    <Text style={styles.FollowValue}>12</Text>
+                    <Text style={styles.Follow}>Following</Text>
+                  </View>
+                </View>
+              </View>
+            </ImageBackground>
+
+          </View>
+          {/* 1st section */}
+
+          {/* 2nd section */}
+          <View>
+
+            <View style={{ padding: 10, paddingLeft: 20, paddingTop: 20 }}>
+              <View style={{ borderBottomWidth: 1, borderColor: 'lightgrey', flexDirection: 'row' }}>
+                <View style={{ marginRight: 3 }}>
+                  <Image
+                    source={require('../assets/images/user.png')}
+                    style={styles.UserDataIcon}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.UserDataHeader}>Username</Text>
+                  {isEditing ? (
+                    <TextInput style={styles.editInput}
+                      underlineColor='white'
+                      activeUnderlineColor="white"
+                      left={IconEditWhite}
+                      defaultValue={userDB.username}
+                      onChangeText={(text) => setUser({ ...user, username: text })} />
+                  ) : (
+                    <Text style={styles.UserData}>{userDB.username}</Text>
+                  )}
+                </View>
               </View>
             </View>
+
+            <View style={{ padding: 10, paddingLeft: 20 }}>
+              <View style={{ borderBottomWidth: 1, borderColor: 'lightgrey', flexDirection: 'row' }}>
+                <View style={{ marginRight: 3 }}>
+                  <Image
+                    source={require('../assets/images/email.png')}
+                    style={styles.UserDataIcon}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.UserDataHeader}>Email</Text>
+                  {isEditing ? (
+                    <TextInput style={styles.editInput}
+                      underlineColor='white'
+                      activeUnderlineColor="white"
+                      left={IconEditWhite}
+                      defaultValue={userDB.email}
+                      keyboardType="email-address"
+                      onChangeText={(text) => setUser({ ...user, email: text })} />
+                  ) : (
+                    <Text style={styles.UserData}>{userDB.email}</Text>
+                  )}
+                </View>
+              </View>
+            </View>
+
+            <View style={{ padding: 10, paddingLeft: 20 }}>
+              <View style={{ borderBottomWidth: 1, borderColor: 'lightgrey', flexDirection: 'row' }}>
+                <View style={{ marginRight: 3 }}>
+                  <Image
+                    source={require('../assets/images/smartphone-call.png')}
+                    style={styles.UserDataIcon}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.UserDataHeader}>Phone</Text>
+                  {isEditing ? (
+                    <TextInput style={styles.editInput}
+                      underlineColor='white'
+                      activeUnderlineColor="white"
+                      left={IconEditWhite}
+                      defaultValue={userDB.phone}
+                      keyboardType="phone-pad"
+                      onChangeText={(text) => setUser({ ...user, phone: text })} />
+                  ) : (
+                    <Text style={styles.UserData}>{userDB.phone}</Text>
+                  )}
+                </View>
+              </View>
+            </View>
+
+            <View style={{ padding: 10, paddingLeft: 20 }}>
+              <View style={{ flexDirection: 'row' }}>
+                <View style={{ marginRight: 3 }}>
+                  <Image
+                    source={require('../assets/images/calendar.png')}
+                    style={styles.UserDataIcon}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.UserDataHeader}>Date of Birth</Text>
+                  {isEditing ? (
+                    <TouchableOpacity
+                      style={{ backgroundColor: '#ececec', padding: 12 }}
+                      onPress={() => showMode('date')}
+                    >
+                      <Text style={{ fontSize: 16, color: 'black' }}>
+                        {user.dateofbirth}
+                      </Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <Text style={styles.UserData}>{userDB.dateofbirth}</Text>
+                  )}
+                </View>
+              </View>
+            </View>
+            {/* 2nd section */}
 
             <View>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('AdminBook')}
-              >
-                <Text>
-                  Go to admin
-                </Text>
-              </TouchableOpacity>
+              {show && (
+                <DateTimePicker
+                  testID='dateTimePicker'
+                  value={date}
+                  mode={mode}
+                  is24Hour={true}
+                  display='default'
+                  onChange={onChange}
+                />)}
             </View>
 
-            <View style={{ flexDirection: 'row', margin: 20 }}>
-              <View style={{ flexDirection: 'row', borderRightWidth: 0.5, padding: 10, borderColor: 'white' }}>
-                <Text style={styles.FollowValue}>4</Text>
-                <Text style={styles.Follow}>Followers</Text>
-              </View>
-              <View style={{ flexDirection: 'row', padding: 10 }}>
-                <Text style={styles.FollowValue}>12</Text>
-                <Text style={styles.Follow}>Following</Text>
-              </View>
-            </View>
-          </View>
-        </ImageBackground>
 
-      </View>
-      {/* 1st section */}
 
-      {/* 2nd section */}
-      <View>
 
-        <View style={{ padding: 10, paddingLeft: 20, paddingTop: 20 }}>
-          <View style={{ borderBottomWidth: 1, borderColor: 'lightgrey', flexDirection: 'row' }}>
-            <View style={{ marginRight: 3 }}>
-              <Image
-                source={require('../assets/images/user.png')}
-                style={styles.UserDataIcon}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.UserDataHeader}>Username</Text>
+            <View style={{ alignItems: 'center' }}>
               {isEditing ? (
-                <TextInput style={styles.editInput}
-                  underlineColor='white'
-                  activeUnderlineColor="white"
-                  left={IconEditWhite}
-                  defaultValue={user.username}
-                  onChangeText={(text) => setUser({ ...user, username: text })} />
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={updateUser}>
+                  <Text style={{ color: 'white', fontSize: 15 }}>
+                    Save Profile
+                  </Text>
+                </TouchableOpacity>
               ) : (
-                <Text style={styles.UserData}>{user.username}</Text>
+                <TouchableOpacity
+                  style={styles.logoutButton}
+                  onPress={handleLogout}>
+                  <Text style={{ color: 'white', fontSize: 15 }}>
+                    LOG OUT
+                  </Text>
+                </TouchableOpacity>
               )}
             </View>
           </View>
-        </View>
+        </ScrollView>
+      )}
 
-        <View style={{ padding: 10, paddingLeft: 20 }}>
-          <View style={{ borderBottomWidth: 1, borderColor: 'lightgrey', flexDirection: 'row' }}>
-            <View style={{ marginRight: 3 }}>
-              <Image
-                source={require('../assets/images/email.png')}
-                style={styles.UserDataIcon}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.UserDataHeader}>Email</Text>
-              {isEditing ? (
-                <TextInput style={styles.editInput}
-                  underlineColor='white'
-                  activeUnderlineColor="white"
-                  left={IconEditWhite}
-                  defaultValue={user.email}
-                  keyboardType="email-address"
-                  onChangeText={(text) => setUser({ ...user, email: text })} />
-              ) : (
-                <Text style={styles.UserData}>{user.email}</Text>
-              )}
-            </View>
-          </View>
-        </View>
-
-        <View style={{ padding: 10, paddingLeft: 20 }}>
-          <View style={{ borderBottomWidth: 1, borderColor: 'lightgrey', flexDirection: 'row' }}>
-            <View style={{ marginRight: 3 }}>
-              <Image
-                source={require('../assets/images/smartphone-call.png')}
-                style={styles.UserDataIcon}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.UserDataHeader}>Phone</Text>
-              {isEditing ? (
-                <TextInput style={styles.editInput}
-                  underlineColor='white'
-                  activeUnderlineColor="white"
-                  left={IconEditWhite}
-                  defaultValue={user.phone}
-                  keyboardType="phone-pad"
-                  onChangeText={(text) => setUser({ ...user, phone: text })} />
-              ) : (
-                <Text style={styles.UserData}>{user.phone}</Text>
-              )}
-            </View>
-          </View>
-        </View>
-
-        <View style={{ padding: 10, paddingLeft: 20 }}>
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{ marginRight: 3 }}>
-              <Image
-                source={require('../assets/images/calendar.png')}
-                style={styles.UserDataIcon}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.UserDataHeader}>Date of Birth</Text>
-              {isEditing ? (
-                <TextInput style={styles.editInput}
-                  underlineColor='white'
-                  activeUnderlineColor="white"
-                  left={IconEditWhite}
-                  defaultValue={user.dateofbirth}
-                  keyboardType="phone-pad"
-                  onChangeText={(text) => setUser({ ...user, dateofbirth: text })} />
-              ) : (
-                <Text style={styles.UserData}>{user.dateofbirth}</Text>
-              )}
-            </View>
-          </View>
-        </View>
-        {/* 2nd section */}
-        <View style={{ alignItems: 'center' }}>
-          {isEditing ? (
-            <TouchableOpacity
-              style={styles.saveButton}
-              onPress={updateUser}>
-              <Text style={{ color: 'white', fontSize: 15 }}>
-                Save Profile
-              </Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={handleLogout}>
-              <Text style={{ color: 'white', fontSize: 15 }}>
-                LOG OUT
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-
-    </ScrollView>
+    </View>
   );
 }
 
@@ -359,6 +450,7 @@ const styles = StyleSheet.create({
   Profile: {
     flex: 1,
     backgroundColor: 'white',
+    justifyContent: 'center'
   },
   Container: {
     alignItems: 'center',
