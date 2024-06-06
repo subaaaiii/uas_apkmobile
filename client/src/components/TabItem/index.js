@@ -24,7 +24,7 @@ const TabItem = ({isFocused, options, onPress, onLongPress, label}) => {
       ) : (
         <IconSearch width={25} height={25} />
       );
-    if (label === 'Wishlist')
+    if (label === 'Favorite')
       return isFocused ? (
         <IconWishlistActive width={25} height={25} />
       ) : (

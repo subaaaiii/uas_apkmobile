@@ -29,6 +29,7 @@ const FavoriteButton = ({gaya,size,favorite,bookId}) => {
    }
   };
 
+  const Userid =1
   const fetchFavorite = async () => {
     try {
       const response = await axios.get(`${API_URL}/favorite/${Userid}`);
@@ -45,7 +46,7 @@ const FavoriteButton = ({gaya,size,favorite,bookId}) => {
   else{
     setBackgroundColor('#4085B4')
   }
-  }, [favorite, favoriteBook]);
+  }, [favorite]);
 
   return (
     <TouchableOpacity

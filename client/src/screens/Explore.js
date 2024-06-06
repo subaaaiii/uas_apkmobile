@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   TextInput,
   RefreshControl,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import axios from 'axios';
 import {API_URL, WARNA_DISABLE} from '../utils/constant';
 import BookCard2 from '../components/BookCard2';
@@ -60,19 +60,19 @@ const Explore = ({route}) => {
     }
   };
 
-  const isFavorite = (bookId) => {
+  const isFavorite = bookId => {
     return listFavoriteBooks.some(favBook => favBook.Book.id === bookId);
   };
 
   const searchBooks = async (search = '') => {
     try {
       const response = await axios.get(`${API_URL}/books`, {
-        params: { search }
+        params: {search},
       });
       setListBooks(response.data.data);
-      if(search){
+      if (search) {
         setSearchMode(true);
-      }else {
+      } else {
         setSearchMode(false);
       }
     } catch (error) {
@@ -80,13 +80,14 @@ const Explore = ({route}) => {
       throw error;
     }
   };
-  const refetchData =() =>{
+  const refetchData = () => {
     fetchBooks();
     setRefresh(false);
     setSearchMode(false);
     setSearchResult('');
     setSearch('');
-  }
+    fetchBookFavoriteOfUser();
+  };
 
   const fetchCategories = async () => {
     try {
@@ -96,25 +97,34 @@ const Explore = ({route}) => {
       console.log(error);
     }
   };
-  useEffect(() => {
-    fetchBooks();
-    fetchUser();
-    fetchCategories();
-    fetchBookFavoriteOfUser();
-    setSearchMode(false);
-  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const initialize = async () => {
+        if (!category) {
+          await fetchUser();
+          await fetchBooks();
+          await fetchCategories();
+          await fetchBookFavoriteOfUser();
+          setSearchMode(false);
+        }
+      };
+      initialize();
+    }, [category]),
+  );
 
   useEffect(() => {
     searchBooks(category);
     setSearchResult(category);
+    fetchCategories();
   }, [category]);
 
-  useEffect(() => {
-    console.log('listbooks', listbooks);
-    console.log('categories list', categories);
-    console.log('search mode', searchMode);
-    console.log('category', category);
-  }, [listbooks]);
+  // useEffect(() => {
+  //   console.log('listbooks', listbooks);
+  //   console.log('categories list', categories);
+  //   console.log('search mode', searchMode);
+  //   console.log('category', category);
+  // }, [listbooks]);
 
   toggleDropdown = () => {
     setDropDown(!dropDown);
@@ -132,12 +142,12 @@ const Explore = ({route}) => {
                 styles.minicategory,
                 {backgroundColor: categoryColors[category.name]},
               ]}
-              onPress={() => {searchBooks(category.name);
+              onPress={() => {
+                searchBooks(category.name);
                 setSearchResult(category.name);
                 setSearch('');
                 toggleDropdown();
-              }}
-              >
+              }}>
               <Text style={{color: '#F5F5F5'}}>{category.name}</Text>
             </TouchableOpacity>
           ))}
@@ -148,9 +158,11 @@ const Explore = ({route}) => {
   const ContainerComponent = searchMode ? View : ScrollView;
 
   return (
-    <ScrollView style={{flex: 1}} refreshControl={
-      <RefreshControl refreshing={refresh} onRefresh={refetchData} />
-    }>
+    <ScrollView
+      style={{flex: 1}}
+      refreshControl={
+        <RefreshControl refreshing={refresh} onRefresh={refetchData} />
+      }>
       <View
         style={{
           // marginTop: 25,
@@ -170,7 +182,7 @@ const Explore = ({route}) => {
               backgroundColor: '#DFE4E7',
               borderRadius: 10,
               padding: 10,
-              paddingRight: 0
+              paddingRight: 0,
             }}>
             <Image
               source={require('../assets/icons/IconSearch.png')}
@@ -211,12 +223,13 @@ const Explore = ({route}) => {
             </View>
           )}
         </View>
-        {!searchMode &&(
-        <View style={{marginTop: 10}}>
-          <Text style={{fontSize: 14, fontWeight: 400, color: '#F5F5F5'}}>
-            Newest
-          </Text>
-        </View>)}
+        {!searchMode && (
+          <View style={{marginTop: 10}}>
+            <Text style={{fontSize: 14, fontWeight: 400, color: '#F5F5F5'}}>
+              Newest
+            </Text>
+          </View>
+        )}
         <ContainerComponent
           horizontal={!searchMode}
           style={{
@@ -226,15 +239,23 @@ const Explore = ({route}) => {
             marginTop: 15,
             flexWrap: searchMode ? 'wrap' : 'nowrap',
           }}>
-          {listbooks.length === 0 ?(
-            <View style={{ flex: 1, alignSelf: 'center',alignItems: 'center' }}>
+          {listbooks.length === 0 ? (
+            <View style={{flex: 1, alignSelf: 'center', alignItems: 'center'}}>
               <Image
                 source={require('../assets/images/sad.png')}
                 style={{width: 200, height: 200, marginTop: 40}}
               />
-              <Text style={{ marginTop: 5, fontWeight: 600, fontSize: 18, color: WARNA_DISABLE }}>No Book Found...</Text>
+              <Text
+                style={{
+                  marginTop: 5,
+                  fontWeight: 600,
+                  fontSize: 18,
+                  color: WARNA_DISABLE,
+                }}>
+                No Book Found...
+              </Text>
             </View>
-          ): (
+          ) : (
             listbooks.map((book, index) => (
               <BookCard2
                 key={index}
@@ -249,44 +270,44 @@ const Explore = ({route}) => {
                 ]}
                 bookId={book.id}
                 favorite={isFavorite(book.id)}
-                onPress={() => navigation.navigate('Details',{id: book.id})}
+                onPress={() => navigation.navigate('Details', {id: book.id})}
               />
             ))
           )}
         </ContainerComponent>
-        {!searchMode &&(
+        {!searchMode && (
           <View>
             <View style={{marginTop: 10}}>
-          <Text style={{fontSize: 14, fontWeight: 400, color: '#F5F5F5'}}>
-            Popular
-          </Text>
-        </View>
-        <ScrollView
-          horizontal
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            marginTop: 15,
-            paddingBottom: 30,
-          }}>
-          {listbooks.map((book, index) => (
-            <BookCard2
-              key={index}
-              title={book.name}
-              author={book.author}
-              image={book.images_link}
-              star={book.rating}
-              categories={[
-                {name: book.category1},
-                {name: book.category2},
-                {name: book.category3},
-              ]}
-              favorite={isFavorite(book.id)}
-              bookId={book.id}
-              onPress={() => navigation.navigate('Details')}
-            />
-          ))}
-        </ScrollView>
+              <Text style={{fontSize: 14, fontWeight: 400, color: '#F5F5F5'}}>
+                Popular
+              </Text>
+            </View>
+            <ScrollView
+              horizontal
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                marginTop: 15,
+                paddingBottom: 30,
+              }}>
+              {listbooks.map((book, index) => (
+                <BookCard2
+                  key={index}
+                  title={book.name}
+                  author={book.author}
+                  image={book.images_link}
+                  star={book.rating}
+                  categories={[
+                    {name: book.category1},
+                    {name: book.category2},
+                    {name: book.category3},
+                  ]}
+                  favorite={isFavorite(book.id)}
+                  bookId={book.id}
+                  onPress={() => navigation.navigate('Details')}
+                />
+              ))}
+            </ScrollView>
           </View>
         )}
         {dropDown && renderDropdownContent()}
@@ -301,7 +322,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: '#043657',
     paddingBottom: 30,
-    minHeight: 500
+    minHeight: 500,
   },
 
   firstSection: {

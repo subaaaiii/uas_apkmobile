@@ -13,7 +13,7 @@ const MainNav = () => {
     <Tab.Navigator screenOptions={{ headerShown: false }} tabBar={props => <BottomNavigator {...props} />}>
       <Tab.Screen name='Home' component={Home} />
       <Tab.Screen name='Explore' component={Explore}/>
-      <Tab.Screen name='Wishlist' component={List}/>
+      <Tab.Screen name='Favorite' component={List}/>
     </Tab.Navigator>
   );
 }

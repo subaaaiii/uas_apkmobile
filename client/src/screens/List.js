@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -6,10 +6,9 @@ import {
   ScrollView,
   StyleSheet,
   Image,
-  TextInput,
   RefreshControl,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import axios from 'axios';
 import {API_URL} from '../utils/constant';
 import BookCard from '../components/BookCard';
@@ -18,13 +17,11 @@ import {categoryColors} from '../utils/colors';
 const List = () => {
   const navigation = useNavigation();
   const [refresh, setRefresh] = useState(false);
-  // const [books, setBooks] = useState([]);
   const [user, setUser] = useState([]);
   const [listbooks, setListBooks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [dropDown, setDropDown] = useState(false);
-  // const [search, setSearch] = useState('');
-  // const [searchResult, setSearchResult] = useState('');
+  
 
   const Userid = 1; // Sementara, kalo yg login user dgn id = 1
   const fetchUser = async () => {
@@ -58,11 +55,22 @@ const List = () => {
     fetchUser();
   }, []);
 
-  useEffect(() => {
-    // console.log('books', books);
-    console.log('listbooks', listbooks);
-    console.log('categories list', categories);
-  }, [listbooks]);
+  useFocusEffect(
+    useCallback(() => {
+      const initialize = async () => {
+        fetchBooks();
+    fetchCategories();
+    fetchUser();
+      };
+      initialize();
+    }, []),
+  );
+
+  // useEffect(() => {
+  //   // console.log('books', books);
+  //   console.log('listbooks', listbooks);
+  //   console.log('categories list', categories);
+  // }, [listbooks]);
 
   toggleDropdown = () => {
     setDropDown(!dropDown);
@@ -110,7 +118,7 @@ const List = () => {
           </TouchableOpacity>
           <View>
             <Text style={{fontSize: 20, color: '#f5f5f5', fontWeight: '500'}}>
-              Whislist
+              Favorite
             </Text>
           </View>
           <TouchableOpacity
@@ -122,16 +130,6 @@ const List = () => {
             />
           </TouchableOpacity>
         </View>
-        {/* <View style={{flexDirection: 'row', marginTop: 10}}>
-          {searchResult && (
-            <View style={{flexDirection: 'row'}}>
-              <Text style={{color: '#f5f5f5'}}>Search Result For </Text>
-              <Text style={{color: '#80B4D7', fontWeight: 'bold'}}>
-                "{searchResult}"
-              </Text>
-            </View>
-          )}
-        </View> */}
         {listbooks.map((book, index) => (
           <BookCard
             key={index}

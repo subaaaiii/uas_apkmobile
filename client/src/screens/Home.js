@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -22,11 +22,12 @@ import {
 } from '../assets';
 import FavoriteButton from '../components/FavoriteButton';
 import {Dimensions} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import { API_URL } from '../utils/constant';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
+import {API_URL} from '../utils/constant';
 import {categoryColors} from '../utils/colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { jwtDecode } from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
+import { Use } from 'react-native-svg';
 
 const {width} = Dimensions.get('window');
 
@@ -67,7 +68,7 @@ const Home = () => {
       if (response.ok) {
         setToken(data.accessToken);
         const decoded = jwtDecode(data.accessToken);
-        setUserId(decoded.userId)
+        setUserId(decoded.userId);
       } else {
         Alert.alert(response.msg);
       }
@@ -94,25 +95,31 @@ const Home = () => {
     }
   };
 
+  const Userid = 1; // Sementara, kalo yg login user dgn id = 1
   const fetchBookFavoriteOfUser = async () => {
     try {
-      const response = await axios.get(`${API_URL}/favorite/1`);
+      const response = await axios.get(`${API_URL}/favorite/${Userid}`);
       setListFavoriteBooks(response.data.data);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const isFavorite = (bookId) => {
+  const isFavorite = bookId => {
     return listFavoriteBooks.some(favBook => favBook.Book.id === bookId);
   };
 
-  useEffect(() => {
-    fetchBooks();
-    fetchCategories();
-    getNewToken();
-    fetchBookFavoriteOfUser()
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const initialize = async () => {
+        await fetchBooks();
+        await fetchCategories();
+        await getNewToken();
+        await fetchBookFavoriteOfUser();
+      };
+      initialize();
+    }, []),
+  );
 
   useEffect(() => {
     console.log('books', books);
@@ -182,7 +189,7 @@ const Home = () => {
                     source={require('../assets/icons/IconStar.png')}
                     style={{width: 14, height: 14, marginRight: 3}}
                   />
-                  <Text style={{fontSize: 14, color: '#212121'}}>4.5</Text>
+                  <Text style={{fontSize: 14, color: '#212121'}}>{books.rating}</Text>
                 </View>
               </View>
               <View style={{marginTop: 10}}>
@@ -290,8 +297,11 @@ const Home = () => {
                         />
                       </ImageBackground>
                     </TouchableOpacity>
-                    <FavoriteButton gaya={{top: 10, right: 15}} favorite={isFavorite(book.id)}
-                    bookId={book.id} />
+                    <FavoriteButton
+                      gaya={{top: 10, right: 15}}
+                      favorite={isFavorite(book.id)}
+                      bookId={book.id}
+                    />
                   </View>
                 );
               })}
@@ -399,7 +409,7 @@ const styles = StyleSheet.create({
   sizebook: {
     width: 120,
     height: 170,
-    borderRadius: 5
+    borderRadius: 5,
   },
   arrivalswrap: {
     flexDirection: 'row',
