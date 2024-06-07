@@ -47,6 +47,7 @@ const Profile = () => {
   const fetchUserInfo = async () => {
     try {
       const response = await axios.get(`${API_URL}/users/${userId}`);
+      console.log(response.data.data)
       const userData = response.data.data;
       const modifiedDate = userData.dateofbirth.split(' ')[0];
       userData.dateofbirth = modifiedDate;
@@ -184,7 +185,7 @@ const Profile = () => {
   return (
     <View style={styles.Profile}>
       {isLoading ? (
-        <View style={styles.loadingContainer}>
+        <View>
           <ActivityIndicator size="small" />
         </View>
       ) : (
@@ -204,6 +205,7 @@ const Profile = () => {
                   onPress={() => {
                     setIsEditing(true)
                     setPhoto(null)
+                    setUser(userDB)
                   }}>
                   <IconEditWhite width={25} height={25} />
                 </TouchableOpacity>

@@ -67,42 +67,6 @@ const createNewUser = async (req, res) => {
     }
 };
 
-// const loginUser = async (req, res) => {
-//     try {
-//         const {
-//             username,
-//             password
-//         } = req.body;
-//         const searchedUsername = username;
-//         const user = await User.findOne({ where: { username: searchedUsername } });
-//         if (user) {
-//             const matchedPassword = await bcrypt.compare(password, user.password);
-//             if (!matchedPassword) {
-//                 return res.json({
-//                     status: 401,
-//                     message: "Password Salah"
-//                 })
-//             }
-//             res.json({
-//                 status: 200,
-//                 message: "Login Berhasil",
-//                 data: user
-//             })
-//         }
-//         else {
-//             res.json({
-//                 status: 401,
-//                 message: "username/email tidak ditemukan"
-//             })
-//         }
-//     } catch (error) {
-//         res.json({
-//             status: 500,
-//             message: error
-//         })
-//     }
-// }
-
 const updateUser = async (req, res) => {
     const {
         username,
@@ -110,6 +74,7 @@ const updateUser = async (req, res) => {
         phone,
         dateofbirth
     } = req.body;
+    console.log(dateofbirth)
     const foto = req.file;
     const { id } = req.params;
     const imageBeforeUpdate = await User.findOne({
@@ -140,13 +105,14 @@ const updateUser = async (req, res) => {
                     },
                 }
             );
+            
             if (foto && imageBeforeUpdate.profilepicture != "default.png") {
                 fs.unlinkSync("images/user/" + imageBeforeUpdate.profilepicture);
             }
+            console.log(user.dateofbirth)
             res.status(201).json({
                 message: "update user success",
                 data: user
-
             });
         }
         else {
