@@ -1,4 +1,4 @@
-const { Favorite, Book, User } = require("../models");
+const { Favorite, Book, User, sequelize } = require("../models");
 
 module.exports = {
   getAllFavorite: async (req, res) => {
@@ -59,4 +59,27 @@ module.exports = {
       res.status(500).json({ message: "Internal Server Error" });
     }
   },
+  getTopBook: async (req, res) => {
+    try {
+      const favorite = await Favorite.findAll({
+        attributes: [
+          'id_book',
+          [sequelize.fn('COUNT', sequelize.col('id_book')), 'count'],
+        ],
+        include: [Book],
+        group: ['id_book', 'Book.id'], // Ensure to include 'Book.id' in the group by to avoid SQL errors
+        order: [[sequelize.fn('COUNT', sequelize.col('id_book')), 'DESC']],
+      });
+  
+      const counts = favorite.map(item => item.get('count'));
+
+      res.status(201).json({
+        message: "Get favorite success",
+        data: favorite,
+        counts
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  }
 };
