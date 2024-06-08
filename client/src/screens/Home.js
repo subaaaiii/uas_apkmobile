@@ -214,12 +214,12 @@ const Home = () => {
           <View style={styles.header}>
 
             <View style={styles.firstSection}>
-              <View style={{ flex: 1, flexDirection: 'row' }}>
+              <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
                 <Image
                   source={require('../assets/images/wink.png')}
                   style={{ width: 30, height: 30 }}
                 />
-                <Text style={{ marginLeft: 10, fontSize: 20, fontWeight: '500', color: '#F5F5F5' }}>Halo, {user.username}</Text>
+                <Text style={{ marginLeft: 10, fontSize: 14, fontWeight: '400', color: '#F5F5F5' }}>Halo, {user.username}</Text>
               </View>
 
               <TouchableOpacity
