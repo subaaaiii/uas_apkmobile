@@ -22,7 +22,7 @@ const Explore = ({route}) => {
   const [refresh, setRefresh] = useState(false);
   const navigation = useNavigation();
   const [listFavoriteBooks, setListFavoriteBooks] = useState([]);
-  // const [books, setBooks] = useState([]);
+  const [popularBooks, setPopularBooks] = useState([]);
   const [searchMode, setSearchMode] = useState(false);
   const [user, setUser] = useState([]);
   const [listbooks, setListBooks] = useState([]);
@@ -46,6 +46,14 @@ const Explore = ({route}) => {
       const response = await axios.get(`${API_URL}/books`);
       setListBooks(response.data.data);
       // setSearchMode(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const fetchPopularBook = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/favorite`);
+      setPopularBooks(response.data.data);
     } catch (error) {
       console.log(error);
     }
@@ -87,6 +95,7 @@ const Explore = ({route}) => {
     setSearchResult('');
     setSearch('');
     fetchBookFavoriteOfUser();
+    fetchPopularBook();
   };
 
   const fetchCategories = async () => {
@@ -106,6 +115,7 @@ const Explore = ({route}) => {
           await fetchBooks();
           await fetchCategories();
           await fetchBookFavoriteOfUser();
+          await fetchPopularBook();
           setSearchMode(false);
         }
       };
@@ -290,20 +300,20 @@ const Explore = ({route}) => {
                 marginTop: 15,
                 paddingBottom: 30,
               }}>
-              {listbooks.map((book, index) => (
+              {popularBooks.map((book, index) => (
                 <BookCard2
                   key={index}
-                  title={book.name}
-                  author={book.author}
-                  image={book.images_link}
-                  star={book.rating}
+                  title={book.Book.name}
+                  author={book.Book.author}
+                  image={book.Book.images_link}
+                  star={book.Book.rating}
                   categories={[
-                    {name: book.category1},
-                    {name: book.category2},
-                    {name: book.category3},
+                    {name: book.Book.category1},
+                    {name: book.Book.category2},
+                    {name: book.Book.category3},
                   ]}
-                  favorite={isFavorite(book.id)}
-                  bookId={book.id}
+                  favorite={isFavorite(book.Book.id)}
+                  bookId={book.Book.id}
                   onPress={() => navigation.navigate('Details')}
                 />
               ))}

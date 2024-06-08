@@ -38,7 +38,8 @@ const Home = () => {
   const [loading, isLoading] = useState(false)
   const [refresh, setRefresh] = useState(false);
   const [photo, setPhoto] = useState('')
-  const [books, setBooks] = useState([]); //temporary top book
+  const [books, setBooks] = useState([]); //top of the week books
+  const [countFavorite, setCountFavorite] = useState([]); 
   const [token, setToken] = useState('');
   const [userId, setUserId] = useState();
   const [user, setUser] = useState([])
@@ -105,11 +106,20 @@ const Home = () => {
     }
   };
 
+  const fetchPopularBook = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/favorite`);
+      setBooks(response.data.data[0].Book);
+      setCountFavorite(response.data.counts[0]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const fetchBooks = async () => {
     try {
       const response = await axios.get(`${API_URL}/books`);
-      setBooks(response.data.data[0]);
       setListBooks(response.data.data);
+      setCountFavorite(response.data.counts[0]);
     } catch (error) {
       console.log(error);
     }
@@ -146,6 +156,7 @@ const Home = () => {
         await fetchBooks();
         await fetchCategories();
         await fetchBookFavoriteOfUser();
+        await fetchPopularBook();
         isLoading(false);
       };
       initialize();
@@ -289,7 +300,7 @@ const Home = () => {
                   </View>
                   <View style={{ marginTop: 14 }}>
                     <Text style={{ fontSize: 14, color: '#F5F5F5' }}>
-                      Favorited by 15 Users
+                      Favorited by {countFavorite} Users
                     </Text>
                   </View>
                   <View style={{ marginTop: 16 }}>
