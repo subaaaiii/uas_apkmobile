@@ -307,7 +307,7 @@ module.exports = {
         {
             name: "Alien Invasion",
             author: "Tim Lebbon",
-            image: "alien_invasion.jpg",
+            image: "alien_invasion1.jpg",
             category1: "sci-fi",
             category2: "horror",
             category3: "adventure",
