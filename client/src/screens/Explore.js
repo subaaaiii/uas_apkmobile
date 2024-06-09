@@ -268,6 +268,7 @@ const Explore = ({route}) => {
           ) : (
             listbooks.map((book, index) => (
               <BookCard2
+                searchMode={searchMode}
                 key={index}
                 title={book.name}
                 author={book.author}
@@ -303,6 +304,7 @@ const Explore = ({route}) => {
               }}>
               {popularBooks.map((book, index) => (
                 <BookCard2
+                  searchMode={false}
                   key={index}
                   title={book.Book.name}
                   author={book.Book.author}

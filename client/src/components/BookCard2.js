@@ -10,9 +10,9 @@ import {
 import FavoriteButton from './FavoriteButton';
 import {categoryColors} from '../utils/colors';
 
-const BookCard2 = ({ title, author, categories, onPress, image, star,favorite,bookId, refetchData }) => {
+const BookCard2 = ({ title, author, categories, onPress, image, star,favorite,bookId, refetchData, searchMode }) => {
   return (
-    <View style={styles.thirdSection}>
+    <View style={[styles.thirdSection, { width : searchMode ? 140 : 'auto'  }]}>
       
       <ImageBackground
         source={{ uri: image.toString() }}
@@ -84,7 +84,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#0E5381',
     borderRadius: 10,
     // overflow: 'hidden',
-    marginBottom: 20
+    marginBottom: 20,
+    // width: searchMode? 140 : 'auto',
+    // height: 'auto',
   },
   categorySection: {
     height: 440,
@@ -108,6 +110,7 @@ const styles = StyleSheet.create({
     fontSize: 8,
     marginRight: 5,
     color: '#F5F5F5',
+    marginBottom: 5
   },
   primerbutton: {
     paddingHorizontal: 6,
