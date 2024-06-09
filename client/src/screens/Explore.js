@@ -279,6 +279,7 @@ const Explore = ({route}) => {
                   {name: book.category3},
                 ]}
                 bookId={book.id}
+                refetchData={refetchData}
                 favorite={isFavorite(book.id)}
                 onPress={() => navigation.navigate('Details', {id: book.id})}
               />
@@ -314,7 +315,8 @@ const Explore = ({route}) => {
                   ]}
                   favorite={isFavorite(book.Book.id)}
                   bookId={book.Book.id}
-                  onPress={() => navigation.navigate('Details')}
+                  refetchData={refetchData}
+                  onPress={() => navigation.navigate('Details', {id: book.Book.id})}
                 />
               ))}
             </ScrollView>

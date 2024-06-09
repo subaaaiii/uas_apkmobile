@@ -165,6 +165,7 @@ const Home = () => {
 
   useEffect(() => {
     fetchUserPhoto();
+    fetchBookFavoriteOfUser();
     // console.log('books', books);
     // // console.log('listbooks', listbooks);
     // // console.log('categories', categories);
@@ -176,9 +177,12 @@ const Home = () => {
   function refetchData() {
     fetchUserPhoto();
     fetchBooks();
+    fetchBookFavoriteOfUser();
+    fetchPopularBook();
     // fetchCategories();
     setRefresh(false);
   }
+  const defaultImage = require('../assets/images/noimage.png');
   return (
     <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
       {!statusToken ? (
@@ -241,11 +245,13 @@ const Home = () => {
               <View style={styles.thirdSection}>
                 <View>
                   <ImageBackground
-                    source={{ uri: books.images_link }}
+                    // source={{ uri: books.images_link }}
+                    source={{ uri: books.images_link } || defaultImage} 
                     style={styles.imagebackground}
                     blurRadius={70}>
                     <Image
-                      source={{ uri: books.images_link }}
+                      // source={{ uri: books.images_link }}
+                      source={{ uri: books.images_link } || defaultImage}
                       style={{ width: 90, height: 140, borderRadius: 5 }}
                     />
                   </ImageBackground>
@@ -356,7 +362,7 @@ const Home = () => {
                   .slice(-4)
                   .reverse()
                   .map((book, index) => {
-                    console.log(book.images_link);
+                    // console.log(book.images_link);
                     return (
                       <View style={{ gap: 20, marginBottom: 10 }} key={index}>
                         <TouchableOpacity
@@ -365,11 +371,13 @@ const Home = () => {
                             navigation.navigate('Details', { id: book.id })
                           }>
                           <ImageBackground
-                            source={{ uri: book.images_link }}
+                            // source={{ uri: book.images_link }}
+                            source={{ uri: book.images_link } || defaultImage} 
                             style={styles.imagebackgroundshadow}
                             blurRadius={70}>
                             <Image
-                              source={{ uri: book.images_link }}
+                              // source={{ uri: book.images_link }}
+                              source={{ uri: book.images_link } || defaultImage} 
                               style={styles.sizebook}
                             />
                           </ImageBackground>
@@ -378,6 +386,7 @@ const Home = () => {
                           gaya={{ top: 10, right: 15 }}
                           favorite={isFavorite(book.id)}
                           bookId={book.id}
+                          refetchData={refetchData}
                         />
                       </View>
                     );

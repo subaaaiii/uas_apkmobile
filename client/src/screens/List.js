@@ -82,6 +82,10 @@ const List = () => {
     setRefresh(false);
   }
 
+  const isFavorite = bookId => {
+    return listbooks.some(favBook => favBook.Book.id === bookId);
+  };
+
   renderDropdownContent = () => {
     return (
       <View style={styles.dropdownContent}>
@@ -132,6 +136,7 @@ const List = () => {
         </View>
         {listbooks.map((book, index) => (
           <BookCard
+            refetchData={refetchData}
             key={index}
             title={book.Book.name}
             author={book.Book.author}
@@ -142,7 +147,8 @@ const List = () => {
               {name: book.Book.category2},
               {name: book.Book.category3},
             ]}
-            favorite={true}
+            // favorite={true}
+            favorite={isFavorite(book.Book.id)}
             bookId={book.Book.id}
             onPress={() => navigation.navigate('Details',{id:book.Book.id })}
           />
