@@ -11,7 +11,6 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { API_URL } from '../utils/constant';
 import { ActivityIndicator } from 'react-native-paper';
-
 const Details = ({ route }) => {
   const [isLoading, setIsLoading] = useState(true);
   const navigation = useNavigation();
@@ -29,6 +28,7 @@ const Details = ({ route }) => {
     }
   };
   useEffect(() => {
+    setIsLoading(true)
     fetchBook();
   }, []);
 

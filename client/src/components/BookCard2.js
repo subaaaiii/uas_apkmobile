@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,12 @@ import {
   StyleSheet,
 } from 'react-native';
 import FavoriteButton from './FavoriteButton';
-import {categoryColors} from '../utils/colors';
+import { categoryColors } from '../utils/colors';
 
-const BookCard2 = ({ title, author, categories, onPress, image, star,favorite,bookId, refetchData, searchMode }) => {
+const BookCard2 = ({ title, author, categories, onPress, image, star, favorite, bookId, refetchData, searchMode, userId }) => {
   return (
-    <View style={[styles.thirdSection, { width : searchMode ? 140 : 'auto'  }]}>
-      
+    <View style={[styles.thirdSection, { width: searchMode ? 140 : 'auto' }]}>
+
       <ImageBackground
         source={{ uri: image.toString() }}
         style={styles.imagebackground}
@@ -31,18 +31,18 @@ const BookCard2 = ({ title, author, categories, onPress, image, star,favorite,bo
       <View style={{ marginTop: 5 }}>
         <Text style={{ fontSize: 10, color: '#F5F5F5' }}>By {author}</Text>
       </View>
-      <View style={{flexDirection: 'row', marginTop: 10, flexWrap:'wrap'}}>
-          {categories.map((category, index) => (
-            <Text
-              key={index}
-              style={[
-                styles.minicategory,
-                {backgroundColor: categoryColors[category.name]},
-              ]}>
-              {category.name}
-            </Text>
-          ))}
-        </View>
+      <View style={{ flexDirection: 'row', marginTop: 10, flexWrap: 'wrap' }}>
+        {categories.map((category, index) => (
+          <Text
+            key={index}
+            style={[
+              styles.minicategory,
+              { backgroundColor: categoryColors[category.name] },
+            ]}>
+            {category.name}
+          </Text>
+        ))}
+      </View>
       <View style={{ marginTop: 5, flexDirection: 'row' }}>
         {Array.from({ length: Math.floor(star) }, (_, index) => (
           <Image
@@ -54,7 +54,7 @@ const BookCard2 = ({ title, author, categories, onPress, image, star,favorite,bo
         {star % 1 !== 0 && (
           <Image
             source={require('../assets/icons/IconStar-half.png')}
-            style={{ width: 5, height:9.5, marginRight: 3 }}
+            style={{ width: 5, height: 9.5, marginRight: 3 }}
           />
         )}
       </View>
@@ -64,18 +64,19 @@ const BookCard2 = ({ title, author, categories, onPress, image, star,favorite,bo
         </TouchableOpacity>
       </View>
       <FavoriteButton
-          gaya={{ top: 10, right: 10, padding: 2, borderRadius: 7 }}
-          size={{ width: 18, height: 18 }}
-          favorite={favorite}
-          bookId={bookId}
-          refetchData={refetchData}
-        />
+        gaya={{ top: 10, right: 10, padding: 2, borderRadius: 7 }}
+        size={{ width: 18, height: 18 }}
+        favorite={favorite}
+        userId={userId}
+        bookId={bookId}
+        refetchData={refetchData}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  
+
   thirdSection: {
     marginRight: 20,
     padding: 10,

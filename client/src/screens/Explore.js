@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,22 +8,28 @@ import {
   Image,
   TextInput,
   RefreshControl,
+  ActivityIndicator
 } from 'react-native';
-import {useNavigation, useFocusEffect} from '@react-navigation/native';
+import { jwtDecode } from 'jwt-decode';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import axios from 'axios';
-import {API_URL, WARNA_DISABLE} from '../utils/constant';
+import { API_URL, WARNA_DISABLE } from '../utils/constant';
 import BookCard2 from '../components/BookCard2';
-import {categoryColors} from '../utils/colors';
+import { categoryColors } from '../utils/colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Explore = ({route}) => {
-  const {category} = route?.params || {category: null};
+const Explore = ({ route }) => {
+  const { category } = route?.params || { category: null };
   // const initialCategory = route?.params?.category || '';
   // const [category, setCategory] = useState(initialCategory);
+  const [loading, isLoading] = useState(true)
   const [refresh, setRefresh] = useState(false);
   const navigation = useNavigation();
   const [listFavoriteBooks, setListFavoriteBooks] = useState([]);
   const [popularBooks, setPopularBooks] = useState([]);
   const [searchMode, setSearchMode] = useState(false);
+  const [userId, setUserId] = useState();
+  const [token, setToken] = useState('')
   const [user, setUser] = useState([]);
   const [listbooks, setListBooks] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -31,13 +37,31 @@ const Explore = ({route}) => {
   const [search, setSearch] = useState('');
   const [searchResult, setSearchResult] = useState('');
 
-  const Userid = 1; // Sementara, kalo yg login user dgn id = 1
-  const fetchUser = async () => {
+  const Userid = userId; // Sementara, kalo yg login user dgn id = 1
+
+  const getNewToken = async () => {
     try {
-      const response = await axios.get(`${API_URL}/users/${Userid}`);
-      setUser(response.data.data);
+      const refreshToken = await AsyncStorage.getItem('refreshToken');
+
+      // const response = await axios.get(`${API_URL}/token?refreshToken=${refreshToken}`, {
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      // });
+      const response = await fetch(
+        `${API_URL}/token?refreshToken=${refreshToken}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      const data = await response.json();
+      const decoded = jwtDecode(data.accessToken);
+      setUserId(decoded.userId);
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   };
 
@@ -75,7 +99,7 @@ const Explore = ({route}) => {
   const searchBooks = async (search = '') => {
     try {
       const response = await axios.get(`${API_URL}/books`, {
-        params: {search},
+        params: { search },
       });
       setListBooks(response.data.data);
       if (search) {
@@ -83,6 +107,7 @@ const Explore = ({route}) => {
       } else {
         setSearchMode(false);
       }
+      isLoading(false);
     } catch (error) {
       console.error('Error fetching books:', error);
       throw error;
@@ -110,23 +135,32 @@ const Explore = ({route}) => {
   useFocusEffect(
     useCallback(() => {
       const initialize = async () => {
+        isLoading(true);
+        await getNewToken();
         if (!category) {
-          await fetchUser();
+          await getNewToken();
           await fetchBooks();
           await fetchCategories();
           await fetchBookFavoriteOfUser();
           await fetchPopularBook();
           setSearchMode(false);
+          // setTimeout(() => {
+          //   isLoading(false);
+          // }, 10000)
         }
+        isLoading(false);
       };
       initialize();
+      // isLoading(false);
     }, [category]),
   );
 
   useEffect(() => {
-    searchBooks(category);
+    fetchBookFavoriteOfUser();
+    // searchBooks(category);
     setSearchResult(category);
     fetchCategories();
+    setRefresh(false);
   }, [category]);
 
   // useEffect(() => {
@@ -150,7 +184,7 @@ const Explore = ({route}) => {
               key={index}
               style={[
                 styles.minicategory,
-                {backgroundColor: categoryColors[category.name]},
+                { backgroundColor: categoryColors[category.name] },
               ]}
               onPress={() => {
                 searchBooks(category.name);
@@ -158,7 +192,7 @@ const Explore = ({route}) => {
                 setSearch('');
                 toggleDropdown();
               }}>
-              <Text style={{color: '#F5F5F5'}}>{category.name}</Text>
+              <Text style={{ color: '#F5F5F5' }}>{category.name}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -168,165 +202,176 @@ const Explore = ({route}) => {
   const ContainerComponent = searchMode ? View : ScrollView;
 
   return (
-    <ScrollView
-      style={{flex: 1}}
-      refreshControl={
-        <RefreshControl refreshing={refresh} onRefresh={refetchData} />
-      }>
-      <View
-        style={{
-          // marginTop: 25,
-          color: 'black',
-          backgroundColor: '#0E5381',
-          backgroundColor: '#4085B4',
-          padding: 10,
-        }}>
-        <View
-          style={[
-            styles.firstSection,
-            {marginTop: 0, alignItems: 'center', gap: 10, paddingRight: 10},
-          ]}>
+    <View style={{ flex: 1, justifyContent: 'center' }}>
+      {loading ? (
+        <View style={styles.loadingContainer} >
+          <ActivityIndicator size="large" />
+        </View>
+      ) : (
+        <ScrollView
+          style={{ flex: 1 }}
+          refreshControl={
+            <RefreshControl refreshing={refresh} onRefresh={refetchData} />
+          }>
           <View
             style={{
-              flexDirection: 'row',
-              backgroundColor: '#DFE4E7',
-              borderRadius: 10,
+              // marginTop: 25,
+              color: 'black',
+              backgroundColor: '#0E5381',
+              backgroundColor: '#4085B4',
               padding: 10,
-              paddingRight: 0,
             }}>
-            <Image
-              source={require('../assets/icons/IconSearch.png')}
-              style={{width: 25, height: 25}}
-            />
-            <TextInput
-              style={styles.searchinput}
-              value={search}
-              onChangeText={value => setSearch(value)}
-              onSubmitEditing={() => {
-                setSearchResult(search);
-                searchBooks(search);
-              }}></TextInput>
-          </View>
-          <TouchableOpacity onPress={toggleDropdown}>
             <View
-              style={{
-                backgroundColor: '#DFE4E7',
-                padding: 5,
-                borderRadius: 10,
-              }}>
-              <Image
-                source={require('../assets/icons/IconFilter.png')}
-                style={{width: 25, height: 25}}
-              />
-            </View>
-          </TouchableOpacity>
-        </View>
-      </View>
-      <View style={styles.header}>
-        <View style={{flexDirection: 'row', marginTop: 10}}>
-          {searchResult && (
-            <View style={{flexDirection: 'row'}}>
-              <Text style={{color: WARNA_DISABLE}}>Search Result For </Text>
-              <Text style={{color: '#80B4D7', fontWeight: 'bold'}}>
-                "{searchResult}"
-              </Text>
-            </View>
-          )}
-        </View>
-        {!searchMode && (
-          <View style={{marginTop: 10}}>
-            <Text style={{fontSize: 14, fontWeight: 400, color: '#F5F5F5'}}>
-              Newest
-            </Text>
-          </View>
-        )}
-        <ContainerComponent
-          horizontal={!searchMode}
-          style={{
-            display: 'flex',
-            flex: 1,
-            flexDirection: 'row',
-            marginTop: 15,
-            flexWrap: searchMode ? 'wrap' : 'nowrap',
-          }}>
-          {listbooks.length === 0 ? (
-            <View style={{flex: 1, alignSelf: 'center', alignItems: 'center'}}>
-              <Image
-                source={require('../assets/images/sad.png')}
-                style={{width: 200, height: 200, marginTop: 40}}
-              />
-              <Text
+              style={[
+                styles.firstSection,
+                { marginTop: 0, alignItems: 'center', gap: 10, paddingRight: 10 },
+              ]}>
+              <View
                 style={{
-                  marginTop: 5,
-                  fontWeight: 600,
-                  fontSize: 18,
-                  color: WARNA_DISABLE,
+                  flexDirection: 'row',
+                  backgroundColor: '#DFE4E7',
+                  borderRadius: 10,
+                  padding: 10,
+                  paddingRight: 0,
                 }}>
-                No Book Found...
-              </Text>
+                <Image
+                  source={require('../assets/icons/IconSearch.png')}
+                  style={{ width: 25, height: 25 }}
+                />
+                <TextInput
+                  style={styles.searchinput}
+                  value={search}
+                  onChangeText={value => setSearch(value)}
+                  onSubmitEditing={() => {
+                    isLoading(true);
+                    setSearchResult(search);
+                    searchBooks(search);
+                  }}></TextInput>
+              </View>
+              <TouchableOpacity onPress={toggleDropdown}>
+                <View
+                  style={{
+                    backgroundColor: '#DFE4E7',
+                    padding: 5,
+                    borderRadius: 10,
+                  }}>
+                  <Image
+                    source={require('../assets/icons/IconFilter.png')}
+                    style={{ width: 25, height: 25 }}
+                  />
+                </View>
+              </TouchableOpacity>
             </View>
-          ) : (
-            listbooks.map((book, index) => (
-              <BookCard2
-                searchMode={searchMode}
-                key={index}
-                title={book.name}
-                author={book.author}
-                image={book.images_link}
-                star={book.rating}
-                categories={[
-                  {name: book.category1},
-                  {name: book.category2},
-                  {name: book.category3},
-                ]}
-                bookId={book.id}
-                refetchData={refetchData}
-                favorite={isFavorite(book.id)}
-                onPress={() => navigation.navigate('Details', {id: book.id})}
-              />
-            ))
-          )}
-        </ContainerComponent>
-        {!searchMode && (
-          <View>
-            <View style={{marginTop: 10}}>
-              <Text style={{fontSize: 14, fontWeight: 400, color: '#F5F5F5'}}>
-                Popular
-              </Text>
+          </View>
+          <View style={styles.header}>
+            <View style={{ flexDirection: 'row', marginTop: 10 }}>
+              {searchResult && (
+                <View style={{ flexDirection: 'row' }}>
+                  <Text style={{ color: WARNA_DISABLE }}>Search Result For </Text>
+                  <Text style={{ color: '#80B4D7', fontWeight: 'bold' }}>
+                    "{searchResult}"
+                  </Text>
+                </View>
+              )}
             </View>
-            <ScrollView
-              horizontal
+            {!searchMode && (
+              <View style={{ marginTop: 10 }}>
+                <Text style={{ fontSize: 14, fontWeight: 400, color: '#F5F5F5' }}>
+                  Newest
+                </Text>
+              </View>
+            )}
+            <ContainerComponent
+              horizontal={!searchMode}
               style={{
                 display: 'flex',
+                flex: 1,
                 flexDirection: 'row',
                 marginTop: 15,
-                paddingBottom: 30,
+                flexWrap: searchMode ? 'wrap' : 'nowrap',
               }}>
-              {popularBooks.map((book, index) => (
-                <BookCard2
-                  searchMode={false}
-                  key={index}
-                  title={book.Book.name}
-                  author={book.Book.author}
-                  image={book.Book.images_link}
-                  star={book.Book.rating}
-                  categories={[
-                    {name: book.Book.category1},
-                    {name: book.Book.category2},
-                    {name: book.Book.category3},
-                  ]}
-                  favorite={isFavorite(book.Book.id)}
-                  bookId={book.Book.id}
-                  refetchData={refetchData}
-                  onPress={() => navigation.navigate('Details', {id: book.Book.id})}
-                />
-              ))}
-            </ScrollView>
+              {listbooks.length === 0 ? (
+                <View style={{ flex: 1, alignSelf: 'center', alignItems: 'center' }}>
+                  <Image
+                    source={require('../assets/images/sad.png')}
+                    style={{ width: 200, height: 200, marginTop: 40 }}
+                  />
+                  <Text
+                    style={{
+                      marginTop: 5,
+                      fontWeight: 600,
+                      fontSize: 18,
+                      color: WARNA_DISABLE,
+                    }}>
+                    No Book Found...
+                  </Text>
+                </View>
+              ) : (
+                listbooks.map((book, index) => (
+                  <BookCard2
+                    searchMode={searchMode}
+                    key={index}
+                    title={book.name}
+                    author={book.author}
+                    image={book.images_link}
+                    star={book.rating}
+                    userId={userId}
+                    categories={[
+                      { name: book.category1 },
+                      { name: book.category2 },
+                      { name: book.category3 },
+                    ]}
+                    bookId={book.id}
+                    refetchData={refetchData}
+                    favorite={isFavorite(book.id)}
+                    onPress={() => navigation.navigate('Details', { id: book.id })}
+                  />
+                ))
+              )}
+            </ContainerComponent>
+            {!searchMode && (
+              <View>
+                <View style={{ marginTop: 10 }}>
+                  <Text style={{ fontSize: 14, fontWeight: 400, color: '#F5F5F5' }}>
+                    Popular
+                  </Text>
+                </View>
+                <ScrollView
+                  horizontal
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    marginTop: 15,
+                    paddingBottom: 30,
+                  }}>
+                  {popularBooks.map((book, index) => (
+                    <BookCard2
+                      searchMode={false}
+                      key={index}
+                      title={book.Book.name}
+                      author={book.Book.author}
+                      image={book.Book.images_link}
+                      star={book.Book.rating}
+                      userId={userId}
+                      categories={[
+                        { name: book.Book.category1 },
+                        { name: book.Book.category2 },
+                        { name: book.Book.category3 },
+                      ]}
+                      favorite={isFavorite(book.Book.id)}
+                      bookId={book.Book.id}
+                      refetchData={refetchData}
+                      onPress={() => navigation.navigate('Details', { id: book.Book.id })}
+                    />
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+            {dropDown && renderDropdownContent()}
           </View>
-        )}
-        {dropDown && renderDropdownContent()}
-      </View>
-    </ScrollView>
+        </ScrollView>
+      )}
+    </View>
   );
 };
 
