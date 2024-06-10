@@ -3,7 +3,8 @@ import { useNavigation, StackActions } from '@react-navigation/native';
 import React, { useState } from 'react'
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { API_URL } from '../utils/constant';
+import { API_URL, WARNA_UTAMA, WARNA_DISABLE } from '../utils/constant';
+
 
 const Login = () => {
   const navigation = useNavigation();
@@ -125,7 +126,7 @@ const styles = StyleSheet.create({
   },
   TitleWelcome: {
     fontFamily: 'TitilliumWeb-Black',
-    color: 'black',
+    color: WARNA_UTAMA,
     letterSpacing: 1,
     fontSize: 30,
     paddingTop: 16,
@@ -134,7 +135,7 @@ const styles = StyleSheet.create({
   TitleDetails: {
     fontFamily: 'TitilliumWeb-Regular',
     paddingLeft: 47,
-    color: 'black',
+    color: WARNA_DISABLE,
     marginBottom: 50,
   },
   inputContainer: {
@@ -144,7 +145,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginVertical: 10,
     paddingHorizontal: 10,
-    borderColor: 'black',
+    borderColor: WARNA_UTAMA,
     borderWidth: 1,
     marginLeft: 45,
     marginRight: 45,
@@ -157,7 +158,7 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 40,
-    backgroundColor: 'black',
+    backgroundColor: WARNA_UTAMA,
     padding: 10,
     borderRadius: 15,
     marginLeft: 45,
