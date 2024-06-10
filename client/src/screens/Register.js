@@ -7,11 +7,12 @@ import {
     TextInput,
     TouchableOpacity,
     Modal,
+    ScrollView
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, StackActions } from '@react-navigation/native';
-import { API_URL } from '../utils/constant';
+import { API_URL, WARNA_UTAMA, WARNA_DISABLE } from '../utils/constant';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 const Signup = () => {
@@ -81,7 +82,7 @@ const Signup = () => {
     };
 
     return (
-        <View>
+        <ScrollView>
             <View style={styles.container}>
                 <Text style={styles.TitleWelcome}>Welcome</Text>
                 <Text style={styles.TitleDetails}>Please enter your details</Text>
@@ -91,7 +92,7 @@ const Signup = () => {
                         onChangeText={setName}
                         value={username}
                         placeholder="Username"
-                        keyboardType="name"
+                        // keyboardType="name"
                         autoCapitalize="words"
                     />
                 </View>
@@ -151,6 +152,7 @@ const Signup = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         flexDirection: 'row',
+                        marginBottom: 20
                     }}>
                     <Text>Already have an Account </Text>
                     <TouchableOpacity onPress={() => navigation.navigate('Login')}>
@@ -189,7 +191,7 @@ const Signup = () => {
                     </View>
                 </View>
             </Modal>
-        </View>
+        </ScrollView>
     );
 };
 
@@ -204,7 +206,7 @@ const styles = StyleSheet.create({
     logo: {
         width: 222,
         height: 105,
-        marginTop: 70,
+        // marginTop: 70,
     },
     container: {
         marginTop: 50,
@@ -214,7 +216,7 @@ const styles = StyleSheet.create({
     },
     TitleWelcome: {
         fontFamily: 'TitilliumWeb-Black',
-        color: 'black',
+        color: WARNA_UTAMA,
         letterSpacing: 1,
         fontSize: 30,
         paddingTop: 16,
@@ -223,7 +225,7 @@ const styles = StyleSheet.create({
     TitleDetails: {
         fontFamily: 'TitilliumWeb-Regular',
         paddingLeft: 47,
-        color: 'black',
+        color: WARNA_DISABLE,
         marginBottom: 50,
     },
     inputContainer: {
@@ -249,7 +251,7 @@ const styles = StyleSheet.create({
     },
     button: {
         marginTop: 40,
-        backgroundColor: 'black',
+        backgroundColor: WARNA_UTAMA,
         padding: 10,
         borderRadius: 15,
         marginLeft: 45,

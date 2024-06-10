@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginVertical: 10,
     paddingHorizontal: 10,
-    borderColor: WARNA_UTAMA,
+    borderColor: 'black',
     borderWidth: 1,
     marginLeft: 45,
     marginRight: 45,
