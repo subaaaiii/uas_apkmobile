@@ -10,7 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-import { API_URL } from '../utils/constant';
+import { API_URL, WARNA_UTAMA } from '../utils/constant';
 
 const Profile = () => {
   const navigation = useNavigation();
@@ -26,6 +26,7 @@ const Profile = () => {
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
   const [text, setText] = useState('Empty')
+  const emailAdmin = 'subai@gmail.com';
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -274,15 +275,23 @@ const Profile = () => {
                   </View>
                 </View>
 
-                <View>
+                {user.email === emailAdmin &&(
+                  <View>
                   <TouchableOpacity
                     onPress={() => navigation.navigate('AdminBook')}
                   >
-                    <Text>
-                      Go to admin
+                    <View style={{ flexDirection: 'row', backgroundColor: WARNA_UTAMA, paddingLeft: 10,  paddingRight: 3, paddingVertical: 2, borderRadius: 5, alignItems: 'center' }}>
+                    <Text style={{  color: '#f5f5f5' }}>
+                     Go to Admin
                     </Text>
+                    <Image
+                    source={require('../assets/icons/IconMenuDrop.png')}
+                    style={styles.UserDataIcon}
+                  />
+                    </View>
                   </TouchableOpacity>
                 </View>
+                )}
 
                 <View style={{ flexDirection: 'row', margin: 20 }}>
                   <View style={{ flexDirection: 'row', borderRightWidth: 0.5, padding: 10, borderColor: 'white' }}>

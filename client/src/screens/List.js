@@ -148,7 +148,7 @@ const List = () => {
     );
   };
   return (
-    <View style={{ flex: 1, justifyContent: 'center' }} refreshControl={
+    <View style={{ flex: 1, justifyContent: 'center',  }} refreshControl={
       <RefreshControl refreshing={refresh} onRefresh={refetchData} />
     }>
       {loading ? (
@@ -156,9 +156,10 @@ const List = () => {
           <ActivityIndicator size="large" />
         </View>
       ) : (
-        <ScrollView style={styles.header} refreshControl={
+        <ScrollView refreshControl={
           <RefreshControl refreshing={refresh} onRefresh={refetchData} />
         }>
+          <View style={styles.header}>
           <View style={styles.firstSection}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Image
@@ -220,6 +221,7 @@ const List = () => {
           )
           }
           {dropDown && renderDropdownContent()}
+          </View>
         </ScrollView>
       )}
     </View>
@@ -236,7 +238,8 @@ const styles = StyleSheet.create({
   },
 
   firstSection: {
-    marginTop: 30,
+    marginTop: 20,
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
   },

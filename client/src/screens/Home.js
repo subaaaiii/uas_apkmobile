@@ -257,6 +257,13 @@ const Home = () => {
                   </ImageBackground>
                 </View>
                 <View>
+                <View style={styles.ratings}>
+                      <Image
+                        source={require('../assets/icons/IconStar.png')}
+                        style={{ width: 14, height: 14, marginRight: 3 }}
+                      />
+                      <Text style={{ fontSize: 14, color: '#212121' }}>{books.rating}</Text>
+                    </View>
                   <View
                     style={{
                       flexDirection: 'row',
@@ -267,21 +274,14 @@ const Home = () => {
                       style={{ fontSize: 18, fontWeight: '500', color: '#F5F5F5' }}>
                       {books.name}
                     </Text>
-                    <View style={styles.ratings}>
-                      <Image
-                        source={require('../assets/icons/IconStar.png')}
-                        style={{ width: 14, height: 14, marginRight: 3 }}
-                      />
-                      <Text style={{ fontSize: 14, color: '#212121' }}>{books.rating}</Text>
-                    </View>
                   </View>
-                  <View style={{ marginTop: 10 }}>
+                  <View style={{ marginTop: 8 }}>
                     <Text style={{ fontSize: 14, color: '#F5F5F5' }}>
                       By {books.author}
                     </Text>
                   </View>
                   {/* category */}
-                  <View style={{ flexDirection: 'row', marginTop: 16 }}>
+                  <View style={{ flexDirection: 'row', marginTop: 10 }}>
                     <Text
                       style={[
                         styles.minicategory,
@@ -304,12 +304,12 @@ const Home = () => {
                       {books.category3}
                     </Text>
                   </View>
-                  <View style={{ marginTop: 14 }}>
+                  <View style={{ marginTop: 10 }}>
                     <Text style={{ fontSize: 14, color: '#F5F5F5' }}>
                       Favorited by {countFavorite} Users
                     </Text>
                   </View>
-                  <View style={{ marginTop: 16 }}>
+                  <View style={{ marginTop: 10 }}>
                     <TouchableOpacity
                       onPress={() =>
                         navigation.navigate('Details', { id: books.id })
@@ -385,6 +385,7 @@ const Home = () => {
                         <FavoriteButton
                           gaya={{ top: 10, right: 15 }}
                           favorite={isFavorite(book.id)}
+                          userId={userId}
                           bookId={book.id}
                           refetchData={refetchData}
                         />
@@ -422,7 +423,7 @@ const styles = StyleSheet.create({
   firstSection: {
     width: width,
     paddingHorizontal: 10,
-    marginTop: 10,
+    // marginTop: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -448,6 +449,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0E5381',
     borderRadius: 10,
     overflow: 'hidden',
+    alignItems: 'center'
   },
   categorySection: {
     paddingHorizontal: 25,
@@ -462,10 +464,12 @@ const styles = StyleSheet.create({
   },
   ratings: {
     flexDirection: 'row',
+    alignSelf: 'flex-end',
     alignItems: 'center',
     backgroundColor: '#F5F5F5',
-    paddingHorizontal: 6,
-    borderRadius: 8,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 5,
     overflow: 'hidden',
   },
   minicategory: {
