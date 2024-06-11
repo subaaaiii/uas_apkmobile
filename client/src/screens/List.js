@@ -13,7 +13,6 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import axios from 'axios';
 import { API_URL, WARNA_DISABLE } from '../utils/constant';
 import BookCard from '../components/BookCard';
-import { categoryColors } from '../utils/colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
 
@@ -24,22 +23,15 @@ const List = () => {
   const [user, setUser] = useState([]);
   const [listbooks, setListBooks] = useState([]);
   const [userId, setUserId] = useState();
-  const [categories, setCategories] = useState([]);
-  const [dropDown, setDropDown] = useState(false);
   const [photo, setPhoto] = useState('')
 
 
-  const Userid = userId; // Sementara, kalo yg login user dgn id = 1
+  const Userid = userId; 
 
   const getNewToken = async () => {
     try {
       const refreshToken = await AsyncStorage.getItem('refreshToken');
 
-      // const response = await axios.get(`${API_URL}/token?refreshToken=${refreshToken}`, {
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      // });
       const response = await fetch(
         `${API_URL}/token?refreshToken=${refreshToken}`,
         {
@@ -75,14 +67,6 @@ const List = () => {
       console.log(error);
     }
   };
-  const fetchCategories = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/categories`);
-      setCategories(response.data.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   useFocusEffect(
     useCallback(() => {
@@ -91,7 +75,6 @@ const List = () => {
         await getNewToken()
         await fetchUserPhoto();
         await fetchBooks();
-        await fetchCategories();
         isLoading(false)
       };
       initialize();
@@ -101,23 +84,10 @@ const List = () => {
   useEffect(() => {
     fetchUserPhoto();
     fetchBooks();
-    fetchCategories();
   }, [userId]);
-
-
-  // useEffect(() => {
-  //   // console.log('books', books);
-  //   console.log('listbooks', listbooks);
-  //   console.log('categories list', categories);
-  // }, [listbooks]);
-
-  toggleDropdown = () => {
-    setDropDown(!dropDown);
-  };
 
   function refetchData() {
     fetchBooks();
-    // fetchCategories();
     setRefresh(false);
   }
 
@@ -125,28 +95,6 @@ const List = () => {
     return listbooks.some(favBook => favBook.Book.id === bookId);
   };
 
-  renderDropdownContent = () => {
-    return (
-      <View style={styles.dropdownContent}>
-        <Text>Filter by kategory:</Text>
-        <View style={styles.categoryFilter}>
-          {categories.map((category, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.minicategory,
-                { backgroundColor: categoryColors[category.name] },
-              ]}
-              onPress={() =>
-                navigation.navigate('List', { category: category.name })
-              }>
-              <Text style={{ color: '#F5F5F5' }}>{category.name}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-    );
-  };
   return (
     <View style={{ flex: 1, justifyContent: 'center',  }} refreshControl={
       <RefreshControl refreshing={refresh} onRefresh={refetchData} />
@@ -220,7 +168,6 @@ const List = () => {
             ))
           )
           }
-          {dropDown && renderDropdownContent()}
           </View>
         </ScrollView>
       )}
