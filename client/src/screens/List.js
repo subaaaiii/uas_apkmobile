@@ -194,7 +194,7 @@ const List = () => {
                   fontSize: 18,
                   color: WARNA_DISABLE,
                 }}>
-                No Book Found...
+                No Favorite.. Try Add one
               </Text>
             </View>
           ) : (
