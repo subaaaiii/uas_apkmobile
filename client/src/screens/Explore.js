@@ -262,7 +262,7 @@ const Explore = ({route}) => {
             {!searchMode && (
               <View style={{marginTop: 10}}>
                 <Text style={{fontSize: 14, fontWeight: 400, color: '#F5F5F5'}}>
-                  Newest
+                  Recomended
                 </Text>
               </View>
             )}
