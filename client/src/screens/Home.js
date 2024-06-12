@@ -74,7 +74,6 @@ const Home = () => {
     try {
       const refreshToken = await AsyncStorage.getItem('refreshToken');
 
-      // const response = await axios.get(`${API_URL}/token?refreshToken=${refreshToken}`);
       const response = await fetch(
         `${API_URL}/token?refreshToken=${refreshToken}`,
         {
@@ -133,7 +132,7 @@ const Home = () => {
     }
   };
 
-  const Userid = userId; // Sementara, kalo yg login user dgn id = 1
+  const Userid = userId;
   const fetchBookFavoriteOfUser = async () => {
     try {
       const response = await axios.get(`${API_URL}/favorite/${Userid}`);
