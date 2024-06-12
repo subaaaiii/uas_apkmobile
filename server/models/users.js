@@ -50,7 +50,7 @@ module.exports = (sequelize, DataTypes) => {
         images_link: {
             type: DataTypes.VIRTUAL,
             get() {
-                return `http://10.0.2.2:1000/images/user/${this.getDataValue(
+                return `${process.env.APP_API_BASE}/images/user/${this.getDataValue(
                     "profilepicture"
                 )}`;
             },
