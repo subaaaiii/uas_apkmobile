@@ -70,7 +70,7 @@ module.exports = (sequelize, DataTypes) => {
       images_link: {
         type: DataTypes.VIRTUAL,
         get() {
-          return `https://bookshelf-c8lx.onrender.com/images/book/${this.getDataValue(
+          return `${process.env.APP_API_BASE}/images/book/${this.getDataValue(
             "image"
           )}`;
         },

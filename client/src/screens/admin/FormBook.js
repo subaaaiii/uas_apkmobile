@@ -110,7 +110,7 @@ const FormBook = ({route}) => {
       });
 
       console.log('Data buku berhasil disimpan:', response.data);
-      navigation.navigate('Wishlist', {refresh: true});
+      navigation.navigate('AdminBook', {refresh: true});
     } catch (error) {
       console.error('Gagal menyimpan data buku:', error);
     }
@@ -127,7 +127,7 @@ const FormBook = ({route}) => {
       });
 
       console.log('Data buku berhasil disimpan:', response.data);
-      navigation.navigate('Wishlist', {refresh: true});
+      navigation.navigate('AdminBook', {refresh: true});
     } catch (error) {
       console.error('Gagal menyimpan data buku:', error);
     }
@@ -294,7 +294,7 @@ const FormBook = ({route}) => {
               <View style={{flexDirection: 'row', flex: 1}}>
                 <View style={styles.categoriesInput}>
                   {book.category3 ? (
-                    <Text>{book.category1}</Text>
+                    <Text>{book.category3}</Text>
                   ) : (
                     <Text style={{color: WARNA_DISABLE}}>
                       Select category...
