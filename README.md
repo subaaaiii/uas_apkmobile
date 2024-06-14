@@ -1,10 +1,10 @@
 # Run App Guide
 
-git clone https://github.com/subaaaiii/uas_apkmobile.git
-cd uas_apkmobile
-buat file .env di server dengan contoh env.example
+git clone https://github.com/subaaaiii/uas_apkmobile.git \n
+cd uas_apkmobile\n
+buat file .env di server dengan contoh env.example\n
 
-cd server:
+cd server:\n
 yarn install
 make database uas_apkmobile
 sequelize db:migrate
